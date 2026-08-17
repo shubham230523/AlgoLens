@@ -1,0 +1,72 @@
+# Task Management
+
+- [/] Milestone 0: Project Foundation
+    - [x] Research existing project structure
+    - [x] Initialize project configuration (ESLint, Prettier)
+    - [x] Install core dependencies (Zustand, Lucide)
+    - [x] Create directory structure
+    - [x] Set up Navigation foundation (Expo Router)
+    - [x] Set up Theme system (Semantic Tokens)
+- [x] Milestone 1: Design System (UI Components)
+    - [x] Implement `ThemedText`
+    - [x] Implement `Button`
+    - [x] Implement `Card`
+    - [x] Implement `Input`
+    - [ ] Implement `ProgressBar` & `Slider`
+- [/] Milestone 2: Algorithm Engine (Core Logic)
+    - [x] Define `Algorithm` & `VisualizationEvent` types
+    - [x] Create `playbackStore` (Zustand)
+    - [x] Implement `Bubble Sort` event generation
+    - [ ] Create generic `AlgorithmEngine` helper
+- [/] Milestone 3: Visualization Engine (Renderers)
+    - [x] Implement `ArrayVisualizer` (Bar Chart style)
+    - [x] Implement `PlaybackControls` (Play, Pause, Step, Reset)
+    - [x] Create `Visualizer` screen with state restoration
+    - [ ] Add smooth Reanimated transitions for swaps
+- [/] Milestone 4: Algorithm Library & Explorer
+    - [x] Create `Algorithm Registry` (centralized index)
+    - [x] Implement `AlgorithmCard` component
+    - [x] Build `Home` screen with Featured/Categories sections
+    - [x] Build `Explore` screen with Search/Filters
+- [x] Milestone 5: Initial 10 Algorithms
+    - [x] Implement `Bubble Sort`
+    - [x] Implement `Selection Sort`
+    - [x] Implement `Insertion Sort`
+    - [x] Implement `Linear Search`
+    - [x] Implement `Binary Search`
+    - [ ] Implement `Merge Sort` (Recursion visualization prep)
+    - [ ] Implement `Quick Sort`
+    - [ ] Implement `Linked List` basic operations
+- [x] Milestone 6: Interactive Input & Generator
+    - [x] Create `CustomInput` component
+    - [x] Implement `RandomArrayGenerator` utility
+    - [x] Add "Try Custom Input" to Visualizer
+- [x] Milestone 7 & 8: Prediction & Practice
+    - [x] Create `PredictionMode` UI overlay
+    - [x] Implement `PredictionEngine` (check answer against next event)
+    - [ ] Build basic `Quiz` component
+- [x] Milestone 9: Progress Tracking System
+    - [x] Implement `storage` utility (AsyncStorage)
+    - [x] Create `progressStore` with persistence
+    - [x] Track viewed/completed algorithms
+    - [x] Implement Favorites system
+- [x] Milestone 11: Code Synchronization
+    - [x] Add `CodeViewer` component to Visualizer
+    - [x] Implement syntax highlighting logic
+    - [x] Link `codeLine` from events to UI highlighting
+- [x] Milestone 12: AI Tutor Integration
+    - [x] Create `AITutor` UI (Chat interface)
+    - [x] Implement AI explanation logic (Foundation)
+    - [ ] Integrate real LLM API (Future extension)
+- [/] Milestone 13: Tree & Graph visualizers
+    - [ ] Implement `TreeVisualizer` (SVG/Reanimated)
+    - [ ] Implement `BST` search/insertion
+    - [ ] Implement `GraphVisualizer`
+    - [ ] Implement `BFS` & `DFS`
+- [ ] Milestone 14: Learning Paths
+- [ ] Milestone 15: Offline Mode & Caching
+- [ ] Milestone 16: Performance Optimization
+- [ ] Milestone 17: Accessibility Implementation
+- [ ] Milestone 18: Production Hardening
+- [ ] Milestone 19: Testing (Unit, Integration, E2E)
+- [ ] Milestone 20: Release Preparation

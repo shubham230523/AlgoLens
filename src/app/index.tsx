@@ -1,98 +1,88 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { useColorScheme } from 'react-native';
+import { Colors, Spacing } from '@/constants/theme';
+import { ThemedText } from '@/components/ui/ThemedText';
+import { AlgorithmCard } from '@/components/ui/AlgorithmCard';
+import { LearningPathCard } from '@/components/ui/LearningPathCard';
+import { ALL_ALGORITHMS, CATEGORIES, LEARNING_PATHS } from '@/algorithms';
+import { useRouter } from 'expo-router';
+import { Card } from '@/components/ui/Card';
 
 export default function HomeScreen() {
+  const scheme = useColorScheme() ?? 'light';
+  const colors = Colors[scheme];
+  const router = useRouter();
+
+  const featuredAlgorithms = ALL_ALGORITHMS.slice(0, 3);
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.header}>
+        <ThemedText variant="h1">AlgoLens</ThemedText>
+        <ThemedText variant="caption">See Algorithms Come Alive</ThemedText>
+      </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <View style={styles.section}>
+        <ThemedText variant="h2" style={styles.sectionTitle}>Learning Paths</ThemedText>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
+          {LEARNING_PATHS.map(path => (
+            <LearningPathCard
+              key={path.id}
+              path={path}
+              onPress={() => router.push(`/path/${path.id}`)}
+            />
+          ))}
+        </ScrollView>
+      </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+      <View style={styles.section}>
+        <ThemedText variant="h2" style={styles.sectionTitle}>Featured</ThemedText>
+        {featuredAlgorithms.map(algo => (
+          <AlgorithmCard
+            key={algo.id}
+            algorithm={algo}
+            onPress={() => router.push(`/visualizer/${algo.id}`)}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+        ))}
+      </View>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <View style={styles.section}>
+        <ThemedText variant="h2" style={styles.sectionTitle}>Categories</ThemedText>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
+          {CATEGORIES.map(category => (
+            <Card key={category} style={styles.categoryCard} onPress={() => router.push({ pathname: '/explore', params: { category } })}>
+              <ThemedText variant="h3">{category}</ThemedText>
+            </Card>
+          ))}
+        </ScrollView>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
-  safeArea: {
-    flex: 1,
+  header: {
+    padding: Spacing.four,
+    paddingTop: Spacing.five,
+  },
+  section: {
+    paddingVertical: Spacing.three,
+  },
+  sectionTitle: {
     paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    marginBottom: Spacing.two,
   },
-  heroSection: {
+  horizontalList: {
+    gap: Spacing.three,
+    paddingHorizontal: Spacing.four,
+  },
+  categoryCard: {
+    minWidth: 120,
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    height: 80,
   },
 });
