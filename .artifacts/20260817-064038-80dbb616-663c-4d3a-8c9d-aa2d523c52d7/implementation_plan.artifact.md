@@ -1,51 +1,44 @@
-# Milestone 17: Accessibility Implementation Plan
+# Milestone 18: Production Hardening Implementation Plan
 
-This milestone focuses on making **AlgoLens** accessible to all users, including those who rely on assistive technologies like screen readers or prefer reduced motion settings.
+This milestone focuses on making **AlgoLens** robust and resilient to errors. We will implement error boundaries, improve input validation, and ensure the app handles edge cases gracefully.
 
 ## Goal
-Enhance the app's accessibility by adding semantic roles, descriptive labels, and motion preferences to all interactive and visual components.
+Harden the application for production use by implementing global error handling, robust validation, and safe data processing.
 
 ## Proposed Changes
 
-### UI Component Enhancements
+### Global Error Handling
 
-#### [Button.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ui/Button.tsx)
-- Add `accessibilityRole="button"`.
-- Add `accessibilityLabel` prop and default it to the button title.
-- Add `accessibilityState` to reflect `disabled` and `busy` (loading) states.
+#### [NEW] [ErrorBoundary.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ErrorBoundary.tsx)
+- Create a reusable `ErrorBoundary` component to catch runtime errors in the component tree.
+- Provide a user-friendly fallback UI with an option to reset the app or go back home.
 
-#### [Input.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ui/Input.tsx)
-- Add `accessibilityRole="search"` or `"text"` based on usage.
-- Ensure `accessibilityLabel` is present for all inputs.
+#### [_layout.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/app/_layout.tsx)
+- Wrap the main application tree with the new `ErrorBoundary`.
 
-### Visualization Accessibility
+### Robust Input Validation
 
-#### [ArrayVisualizer.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/visualization/ArrayVisualizer.tsx)
-- Add `accessibilityRole="image"` or `"summary"` to the container.
-- Provide a dynamic `accessibilityLabel` that describes the current state of the array (e.g., "Array of 5 elements: 2, 5, 8, 10, 12. Current focus at indices 0 and 1").
-- **Reduce Motion**: Use `useReducedMotion` from `react-native-reanimated` to disable or simplify animations when the user has enabled reduced motion in system settings.
+#### [CustomInputModal.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/visualization/CustomInputModal.tsx)
+- Add comprehensive validation for user-provided arrays (min/max size, numeric values only).
+- Add specific validation for searching algorithms (ensure target exists or handle "not found" cases gracefully).
+- Provide clear error messages to the user within the modal.
 
-#### [TreeVisualizer.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/visualization/TreeVisualizer.tsx)
-- Add descriptive `accessibilityLabel` for the tree structure and current highlights.
-- Implement `Reduce Motion` fallbacks.
+### Safe Data Processing
 
-### Navigation and Controls
-
-#### [PlaybackControls.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/visualization/PlaybackControls.tsx)
-- Add specific `accessibilityLabel` for each control (e.g., "Play Algorithm", "Skip to Next Step").
-- Add `accessibilityHint` to explain the effect of the buttons.
+#### [VisualizerScreen.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/app/visualizer/[id].tsx)
+- Implement `try-catch` blocks around `generateSteps` and step-by-step state calculations.
+- Handle cases where an algorithm ID is invalid or its definition is missing.
+- Ensure that if an error occurs during visualization, the app doesn't crash but instead shows a clear error state or resets the view.
 
 ---
 
 ## Verification Plan
 
 ### Automated Tests
-- `npm run lint`: Ensure code quality.
-- Verify that `accessibility` props are correctly passed down in unit tests (if applicable).
+- `npm run lint`: Ensure no new code quality issues.
+- Verify that the `ErrorBoundary` correctly catches a simulated error in a sub-component.
 
 ### Manual Verification
-- **Screen Reader Test**: Enable TalkBack (Android) or VoiceOver (iOS/Web) and navigate through the app. Verify that:
-  - All buttons are announced with their correct labels and states.
-  - The visualizers provide a meaningful summary of the current step.
-- **Reduce Motion Test**: Enable "Reduce Motion" in system settings and verify that animations are simplified or removed, providing a static but clear transition.
-- **Contrast Check**: Ensure text and highlight colors meet WCAG AA standards (checked via color picking tool).
+- **Invalid Input Test**: Try to enter strings, extremely large arrays, or empty inputs in the `CustomInputModal` and verify that appropriate error messages are shown.
+- **Error Trigger Test**: Temporarily inject a `throw new Error()` in a visualization component and verify that the `ErrorBoundary` fallback UI appears.
+- **Edge Case Test**: Test the visualizer with a single-element array or an array of identical elements to ensure the engine handles them without crashing.

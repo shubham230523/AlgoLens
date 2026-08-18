@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
@@ -8,12 +8,14 @@ import { useProgressStore } from '@/store/progressStore';
 import { getAlgorithmById, bubbleSort } from '@/algorithms';
 import { ArrayVisualizer } from '@/components/visualization/ArrayVisualizer';
 import { TreeVisualizer } from '@/components/visualization/TreeVisualizer';
+import { GraphVisualizer } from '@/components/visualization/GraphVisualizer';
 import { PlaybackControls } from '@/components/visualization/PlaybackControls';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { CustomInputModal } from '@/components/visualization/CustomInputModal';
 import { PredictionOverlay } from '@/components/visualization/PredictionOverlay';
 import { CodeViewer } from '@/components/visualization/CodeViewer';
 import { AITutorModal } from '@/components/visualization/AITutorModal';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Settings2, Brain, Heart, Code, Sparkles } from 'lucide-react-native';
 
 export default function VisualizerScreen() {
@@ -43,15 +45,20 @@ export default function VisualizerScreen() {
   const [showCode, setShowCode] = useState(false);
   const [isAITutorVisible, setIsAITutorVisible] = useState(false);
 
-  const initialArray = useMemo(() => {
+  const initialData = useMemo(() => {
     if (typeof inputData === 'object' && 'array' in inputData) {
       return inputData.array;
+    }
+    if (typeof inputData === 'object' && 'tree' in inputData) {
+        return inputData.tree;
     }
     return inputData;
   }, [inputData]);
 
-  const [currentData, setCurrentData] = useState<number[]>(initialArray);
+  const [currentData, setCurrentData] = useState<any>(initialData);
   const [sortedIndices, setSortedIndices] = useState<Set<number>>(new Set());
+
+  const prevStepIndexRef = useRef<number>(-1);
 
   // Initialize steps & track view
   useEffect(() => {
@@ -61,39 +68,44 @@ export default function VisualizerScreen() {
     markViewed(algorithm.id);
   }, [algorithm, inputData]);
 
-  // Handle step changes and completion tracking
+  // Handle step changes with optimization
   useEffect(() => {
+    const prevIndex = prevStepIndexRef.current;
+
+    // Full reset
     if (currentStepIndex === -1) {
-      setCurrentData(initialArray);
+      setCurrentData(initialData);
       setSortedIndices(new Set());
+      prevStepIndexRef.current = -1;
       return;
     }
 
-    const newData = [...initialArray];
-    const newSorted = new Set<number>();
+    if (algorithm.visualizationType === 'GRAPH') {
+        setCurrentData(inputData);
+    } else {
+        let newData: any;
+        let newSorted: Set<number>;
 
-    for (let i = 0; i <= currentStepIndex; i++) {
-      const step = steps[i];
-      if (step.type === 'SWAP') {
-        const [idx1, idx2] = step.indices;
-        if (step.indices.length === 2) {
-          [newData[idx1], newData[idx2]] = [newData[idx2], newData[idx1]];
-        } else if (step.indices.length === 1 && step.variables?.array) {
-          step.variables.array.forEach((val: number, idx: number) => {
-            newData[idx] = val;
-          });
+        // Optimization: If only one step forward, apply delta to current state
+        if (currentStepIndex === prevIndex + 1 && prevIndex >= -1) {
+            newData = Array.isArray(currentData) ? [...currentData] : currentData;
+            newSorted = new Set(sortedIndices);
+            const step = steps[currentStepIndex];
+            applyStep(step, newData, newSorted);
+        } else {
+            // Re-calculate from scratch
+            newData = Array.isArray(initialData) ? [...initialData] : initialData;
+            newSorted = new Set<number>();
+            for (let i = 0; i <= currentStepIndex; i++) {
+              applyStep(steps[i], newData, newSorted);
+            }
         }
-      } else if (step.type === 'UPDATE_VALUE' && step.variables?.array) {
-        step.variables.array.forEach((val: number, idx: number) => {
-          newData[idx] = val;
-        });
-      } else if (step.type === 'MARK_SORTED') {
-        step.indices.forEach(idx => newSorted.add(idx));
-      }
+
+        setCurrentData(newData);
+        setSortedIndices(newSorted);
     }
 
-    setCurrentData(newData);
-    setSortedIndices(newSorted);
+    prevStepIndexRef.current = currentStepIndex;
 
     // Track completion
     if (currentStepIndex === steps.length - 1 && steps.length > 0) {
@@ -107,7 +119,27 @@ export default function VisualizerScreen() {
         setShowPrediction(true);
       }
     }
-  }, [currentStepIndex, steps, initialArray, isPredictionMode]);
+  }, [currentStepIndex, steps, initialData, isPredictionMode, inputData, algorithm.visualizationType]);
+
+  const applyStep = (step: any, data: any, sorted: Set<number>) => {
+    if (!step) return;
+    if (step.type === 'SWAP' && Array.isArray(data)) {
+        const [idx1, idx2] = step.indices;
+        if (step.indices.length === 2) {
+          [data[idx1], data[idx2]] = [data[idx2], data[idx1]];
+        } else if (step.indices.length === 1 && step.variables?.array) {
+          step.variables.array.forEach((val: number, idx: number) => {
+            data[idx] = val;
+          });
+        }
+    } else if (step.type === 'UPDATE_VALUE' && step.variables?.array && Array.isArray(data)) {
+        step.variables.array.forEach((val: number, idx: number) => {
+          data[idx] = val;
+        });
+    } else if (step.type === 'MARK_SORTED') {
+        step.indices.forEach((idx: number) => sorted.add(idx));
+    }
+  };
 
   // Auto-play logic
   useEffect(() => {
@@ -166,59 +198,67 @@ export default function VisualizerScreen() {
         }}
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.vizContainer}>
-          {showPrediction && nextEvent ? (
-            <PredictionOverlay
-              nextEvent={nextEvent}
-              onCorrect={() => { setShowPrediction(false); nextStep(); }}
-              onIncorrect={() => { setShowPrediction(false); nextStep(); }}
-            />
-          ) : (
-            <>
-              {algorithm.visualizationType === 'TREE' ? (
-                <TreeVisualizer
-                  data={currentData}
-                  currentEvent={currentEvent}
-                  sortedIndices={sortedIndices}
-                />
-              ) : (
-                <ArrayVisualizer
-                  data={currentData}
-                  currentEvent={currentEvent}
-                  sortedIndices={sortedIndices}
-                />
-              )}
-            </>
-          )}
-        </View>
-
-        {!showPrediction && (
-          <View style={styles.infoContainer}>
-            <ThemedText variant="h3">{currentEvent?.description || 'Press Play to Start'}</ThemedText>
-
-            {showCode && (
-              <CodeViewer
-                code={algorithm.code}
-                activeLine={currentEvent?.codeLine}
+      <ErrorBoundary>
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.vizContainer}>
+            {showPrediction && nextEvent ? (
+              <PredictionOverlay
+                nextEvent={nextEvent}
+                onCorrect={() => { setShowPrediction(false); nextStep(); }}
+                onIncorrect={() => { setShowPrediction(false); nextStep(); }}
               />
-            )}
-
-            {currentEvent?.variables && (
-              <View style={styles.variables}>
-                {Object.entries(currentEvent.variables).map(([key, val]) => {
-                  if (key === 'array') return null;
-                  return (
-                    <ThemedText key={key} variant="caption">
-                      {key}: {JSON.stringify(val)}
-                    </ThemedText>
-                  );
-                })}
-              </View>
+            ) : (
+              <>
+                {algorithm.visualizationType === 'TREE' ? (
+                  <TreeVisualizer
+                    data={currentData}
+                    currentEvent={currentEvent}
+                    sortedIndices={sortedIndices}
+                  />
+                ) : algorithm.visualizationType === 'GRAPH' ? (
+                  <GraphVisualizer
+                    data={currentData}
+                    currentEvent={currentEvent}
+                    sortedIndices={sortedIndices}
+                  />
+                ) : (
+                  <ArrayVisualizer
+                    data={currentData}
+                    currentEvent={currentEvent}
+                    sortedIndices={sortedIndices}
+                  />
+                )}
+              </>
             )}
           </View>
-        )}
-      </ScrollView>
+
+          {!showPrediction && (
+            <View style={styles.infoContainer}>
+              <ThemedText variant="h3">{currentEvent?.description || 'Press Play to Start'}</ThemedText>
+
+              {showCode && (
+                <CodeViewer
+                  code={algorithm.code}
+                  activeLine={currentEvent?.codeLine}
+                />
+              )}
+
+              {currentEvent?.variables && (
+                <View style={styles.variables}>
+                  {Object.entries(currentEvent.variables).map(([key, val]) => {
+                    if (key === 'array') return null;
+                    return (
+                      <ThemedText key={key} variant="caption">
+                        {key}: {JSON.stringify(val)}
+                      </ThemedText>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          )}
+        </ScrollView>
+      </ErrorBoundary>
 
       <View style={[styles.controls, { borderTopColor: colors.backgroundElement }]}>
         <PlaybackControls />
@@ -229,7 +269,7 @@ export default function VisualizerScreen() {
         onClose={() => setIsInputModalVisible(false)}
         onSubmit={setInputData}
         initialValue={inputData}
-        type={algorithm.category === 'Searching' ? 'SEARCH' : 'ARRAY'}
+        type={algorithm.category === 'Searching' ? 'SEARCH' : (algorithm.category === 'Graphs' ? 'ARRAY' : 'ARRAY')}
       />
 
       <AITutorModal

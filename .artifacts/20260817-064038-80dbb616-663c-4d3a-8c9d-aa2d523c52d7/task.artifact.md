@@ -55,3 +55,10 @@
     - [x] Add `Reduce Motion` support using `useReducedMotion`
     - [x] Update `PlaybackControls.tsx` with descriptive labels
     - [x] Verify with screen reader and system settings
+
+- [ ] Milestone 18: Production Hardening
+    - [ ] Create `ErrorBoundary.tsx` component
+    - [ ] Wrap `_layout.tsx` with `ErrorBoundary`
+    - [ ] Improve input validation in `CustomInputModal.tsx`
+    - [ ] Add safe data processing in `VisualizerScreen.tsx`
+    - [ ] Verify error handling and edge cases

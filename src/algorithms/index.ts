@@ -5,6 +5,8 @@ import { insertionSort } from './sorting/insertionSort';
 import { linearSearch } from './searching/linearSearch';
 import { binarySearch } from './searching/binarySearch';
 import { bstSearch } from './trees/bstSearch';
+import { bfs } from './graphs/bfs';
+import { dfs } from './graphs/dfs';
 
 export * from './learningPaths';
 
@@ -15,6 +17,8 @@ export const ALL_ALGORITHMS: AlgorithmDefinition[] = [
   linearSearch,
   binarySearch,
   bstSearch,
+  bfs,
+  dfs,
 ];
 
 export const CATEGORIES = [

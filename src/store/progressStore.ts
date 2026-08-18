@@ -15,6 +15,7 @@ interface ProgressState extends UserProgress {
   toggleFavorite: (id: string) => void;
   completeAlgorithm: (id: string) => void;
   isFavorite: (id: string) => boolean;
+  isCompleted: (id: string) => boolean;
 }
 
 export const useProgressStore = create<ProgressState>()(
@@ -46,6 +47,7 @@ export const useProgressStore = create<ProgressState>()(
       })),
 
       isFavorite: (id) => get().favorites.includes(id),
+      isCompleted: (id) => get().completedAlgorithms.includes(id),
     }),
     {
       name: 'algolens-progress',
