@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import SyntaxHighlighter from 'react-native-syntax-highlighter';
-import { atomDark, prism } from 'react-syntax-highlighter/dist/styles/prism';
+// @ts-ignore
+import { atomDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { Copy, Check } from 'lucide-react-native';
@@ -25,7 +26,7 @@ const GEMINI_DARK = {
   border: '#3c4043',
   text: '#e3e3e3',
   comment: '#9aa0a6',
-  highlight: 'rgba(138, 180, 248, 0.15)',
+  highlight: 'rgba(138, 180, 248, 0.25)', // Increased opacity for matching/contrast
   highlightBorder: '#8ab4f8',
 };
 
@@ -49,14 +50,14 @@ export function CodeViewer({
   selectedLanguage
 }: CodeViewerProps) {
   const [copied, setCopied] = useState(false);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const verticalScrollRef = useRef<ScrollView>(null);
+  const horizontalScrollRef = useRef<ScrollView>(null);
 
   // Base constants for layout calculation
   const LINE_HEIGHT = 24;
-  const PADDING_TOP = 12; // Controlled padding
+  const PADDING_TOP = 12;
 
   const animatedHighlightStyle = useAnimatedStyle(() => {
-    // Hide highlighter if no active line or line is 0
     if (activeLine === undefined || activeLine < 1) return { opacity: 0, transform: [{ translateY: 0 }] };
 
     return {
@@ -68,9 +69,9 @@ export function CodeViewer({
   });
 
   useEffect(() => {
-    if (activeLine !== undefined && activeLine > 0 && scrollViewRef.current) {
+    if (activeLine !== undefined && activeLine > 0 && verticalScrollRef.current) {
       const scrollPosition = (activeLine - 1) * LINE_HEIGHT;
-      scrollViewRef.current.scrollTo({
+      verticalScrollRef.current.scrollTo({
         y: Math.max(0, scrollPosition - (isDesktop ? 180 : 100)),
         animated: true,
       });
@@ -123,48 +124,59 @@ export function CodeViewer({
         </TouchableOpacity>
       </View>
 
+      {/* SINGLE VERTICAL SCROLLBAR */}
       <ScrollView
-        ref={scrollViewRef}
-        style={styles.scrollView}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: PADDING_TOP }]}
+        ref={verticalScrollRef}
+        style={styles.verticalScrollView}
+        contentContainerStyle={styles.verticalScrollContent}
         showsVerticalScrollIndicator={true}
       >
-        <View style={styles.codeWrapper}>
-          <Animated.View style={[styles.floatingHighlight, animatedHighlightStyle]} />
+        {/* SINGLE HORIZONTAL SCROLLBAR */}
+        <ScrollView
+          ref={horizontalScrollRef}
+          horizontal
+          style={styles.horizontalScrollView}
+          contentContainerStyle={[styles.horizontalScrollContent, { paddingTop: PADDING_TOP }]}
+          showsHorizontalScrollIndicator={true}
+        >
+          <View style={styles.codeWrapper}>
+            {/* Highlighted Chipped Line - Match contrast color */}
+            <Animated.View style={[styles.floatingHighlight, animatedHighlightStyle]} />
 
-          <SyntaxHighlighter
-            language={selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage}
-            style={atomDark}
-            customStyle={{
-              backgroundColor: 'transparent',
-              padding: 0,
-              margin: 0,
-              overflow: 'visible', // CRITICAL: Prevent internal scrollbars
-            }}
-            highlighter="prism"
-            fontSize={13}
-            showLineNumbers={true}
-            lineNumberStyle={{
-              minWidth: 40,
-              paddingRight: 15,
-              color: '#5f6368',
-              textAlign: 'right',
-              fontSize: 11,
-              backgroundColor: 'transparent',
-              fontFamily: FONT_MONO,
-            }}
-            lineProps={() => ({
-              style: {
-                height: LINE_HEIGHT,
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingLeft: 4,
-              },
-            })}
-          >
-            {code[selectedLanguage]}
-          </SyntaxHighlighter>
-        </View>
+            <SyntaxHighlighter
+              language={selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage}
+              style={atomDark}
+              customStyle={{
+                backgroundColor: 'transparent',
+                padding: 0,
+                margin: 0,
+                overflow: 'visible', // CRITICAL: Prevent internal scrollbars
+              }}
+              highlighter="prism"
+              fontSize={13}
+              showLineNumbers={true}
+              lineNumberStyle={{
+                minWidth: 40,
+                paddingRight: 15,
+                color: '#5f6368',
+                textAlign: 'right',
+                fontSize: 11,
+                backgroundColor: 'transparent',
+                fontFamily: FONT_MONO,
+              }}
+              lineProps={() => ({
+                style: {
+                  height: LINE_HEIGHT,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingLeft: 4,
+                },
+              })}
+            >
+              {code[selectedLanguage]}
+            </SyntaxHighlighter>
+          </View>
+        </ScrollView>
       </ScrollView>
     </View>
   );
@@ -201,11 +213,18 @@ const styles = StyleSheet.create({
   copyBtn: {
     padding: 8,
   },
-  scrollView: {
+  verticalScrollView: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 24, // Extra space at bottom
+  verticalScrollContent: {
+    flexGrow: 1,
+  },
+  horizontalScrollView: {
+    flex: 1,
+  },
+  horizontalScrollContent: {
+    minWidth: '100%',
+    paddingBottom: 24,
   },
   codeWrapper: {
     position: 'relative',
@@ -217,8 +236,9 @@ const styles = StyleSheet.create({
     right: 0,
     height: 24,
     backgroundColor: GEMINI_DARK.highlight,
-    borderLeftWidth: 3,
+    borderLeftWidth: 4, // More prominent indicator
     borderLeftColor: GEMINI_DARK.highlightBorder,
-    zIndex: -1, // Keep behind text
+    zIndex: -1,
+    borderRadius: 2, // Chipped line effect
   }
 });

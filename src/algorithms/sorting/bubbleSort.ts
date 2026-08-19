@@ -13,51 +13,66 @@ export const bubbleSort: AlgorithmDefinition = {
   visualizationType: 'BAR',
   defaultInput: [5, 3, 8, 4, 2],
   code: {
-    cpp: `void bubbleSort(int arr[], int n) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
-            if (arr[j] > arr[j + 1]) {
-                swap(arr[j], arr[j + 1]);
+    cpp: `class Solution {
+public:
+    void bubbleSort(int arr[], int n) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    swap(arr[j], arr[j + 1]);
+                }
+            }
+        }
+    }
+};`,
+    java: `class Solution {
+    public void bubbleSort(int[] arr) {
+        int n = arr.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
             }
         }
     }
 }`,
-    java: `public void bubbleSort(int[] arr) {
-    int n = arr.length;
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
-            if (arr[j] > arr[j + 1]) {
-                int temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
-            }
+    python: `class Solution:
+    def bubbleSort(self, arr):
+        n = len(arr)
+        for i in range(n):
+            for j in range(0, n - i - 1):
+                if arr[j] > arr[j + 1]:
+                    arr[j], arr[j + 1] = arr[j + 1], arr[j]
+    #
+    #
+    #
+    #
+    #`,
+    javascript: `class Solution {
+  bubbleSort(arr) {
+    const n = arr.length;
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n - i - 1; j++) {
+        if (arr[j] > arr[j + 1]) {
+          [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
         }
-    }
-}`,
-    python: `def bubble_sort(arr):
-    n = len(arr)
-    for i in range(n):
-        for j in range(0, n - i - 1):
-            if arr[j] > arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]`,
-    javascript: `function bubbleSort(arr) {
-  const n = arr.length;
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n - i - 1; j++) {
-      if (arr[j] > arr[j + 1]) {
-        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
       }
     }
   }
 }`,
-    kotlin: `fun bubbleSort(arr: IntArray) {
-    val n = arr.size
-    for (i in 0 until n) {
-        for (j in 0 until n - i - 1) {
-            if (arr[j] > arr[j + 1]) {
-                val temp = arr[j]
-                arr[j] = arr[j + 1]
-                arr[j + 1] = temp
+    kotlin: `class Solution {
+    fun bubbleSort(arr: IntArray) {
+        val n = arr.size
+        for (i in 0 until n) {
+            for (j in 0 until n - i - 1) {
+                if (arr[j] > arr[j + 1]) {
+                    val temp = arr[j]
+                    arr[j] = arr[j + 1]
+                    arr[j + 1] = temp
+                }
             }
         }
     }
@@ -72,7 +87,7 @@ export const bubbleSort: AlgorithmDefinition = {
       type: 'HIGHLIGHT',
       indices: [],
       description: 'Starting Bubble Sort',
-      codeLine: 1,
+      codeLine: 3,
       variables: { n }
     });
 
@@ -81,7 +96,7 @@ export const bubbleSort: AlgorithmDefinition = {
         type: 'HIGHLIGHT',
         indices: [],
         description: `Outer loop: i = ${i}. Building the sorted suffix.`,
-        codeLine: 2,
+        codeLine: 4,
         variables: { i, n }
       });
 
@@ -90,7 +105,7 @@ export const bubbleSort: AlgorithmDefinition = {
           type: 'COMPARE',
           indices: [j, j + 1],
           description: `Comparing elements at index ${j} and ${j + 1}`,
-          codeLine: 4,
+          codeLine: 6,
           variables: { i, j, n }
         });
 
@@ -99,7 +114,7 @@ export const bubbleSort: AlgorithmDefinition = {
             type: 'HIGHLIGHT',
             indices: [j, j + 1],
             description: `${arr[j]} > ${arr[j + 1]}, so we swap them.`,
-            codeLine: 5,
+            codeLine: 7,
             variables: { i, j, n }
           });
 
@@ -109,7 +124,7 @@ export const bubbleSort: AlgorithmDefinition = {
             type: 'SWAP',
             indices: [j, j + 1],
             description: `Swapped ${arr[j+1]} and ${arr[j]}`,
-            codeLine: 5,
+            codeLine: 7,
             variables: { i, j, n, array: [...arr] }
           });
         }
@@ -119,7 +134,7 @@ export const bubbleSort: AlgorithmDefinition = {
         type: 'MARK_SORTED',
         indices: [n - i - 1],
         description: `Element at index ${n - i - 1} is now in its final position.`,
-        codeLine: 2,
+        codeLine: 4,
         variables: { i, n }
       });
     }
@@ -128,7 +143,7 @@ export const bubbleSort: AlgorithmDefinition = {
       type: 'HIGHLIGHT',
       indices: [],
       description: 'Sorting complete!',
-      codeLine: 1,
+      codeLine: 3,
       variables: { n }
     });
 

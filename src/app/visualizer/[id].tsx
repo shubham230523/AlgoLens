@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, useWindowDimensions } from 'react-native';
+import React, { useEffect, useState, useMemo } from 'react';
+import { View, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -16,7 +16,7 @@ import { PredictionOverlay } from '@/components/visualization/PredictionOverlay'
 import { CodeViewer } from '@/components/visualization/CodeViewer';
 import { AITutorModal } from '@/components/visualization/AITutorModal';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Settings2, Brain, Heart, Sparkles } from 'lucide-react-native';
+import { Settings2, Brain, Heart, Sparkles, Info } from 'lucide-react-native';
 import { SupportedLanguage } from '@/types/algorithm';
 
 export default function VisualizerScreen() {
@@ -47,6 +47,7 @@ export default function VisualizerScreen() {
   const [showPrediction, setShowPrediction] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>('cpp');
   const [isAITutorVisible, setIsAITutorVisible] = useState(false);
+  const [showLegend, setShowLegend] = useState(false);
 
   const initialData = useMemo(() => {
     if (typeof inputData === 'object' && 'array' in inputData) {
@@ -60,7 +61,6 @@ export default function VisualizerScreen() {
 
   const [currentData, setCurrentData] = useState<any>(initialData);
   const [sortedIndices, setSortedIndices] = useState<Set<number>>(new Set());
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setCurrentData(initialData);
@@ -69,41 +69,34 @@ export default function VisualizerScreen() {
 
   useEffect(() => {
     try {
-      setError(null);
       const generatedSteps = algorithm.generateSteps(inputData);
       setSteps(generatedSteps);
       reset();
       markViewed(algorithm.id);
     } catch (e) {
       console.error('Failed to generate steps:', e);
-      setError('Failed to initialize algorithm visualization.');
     }
   }, [algorithm, inputData]);
 
   useEffect(() => {
-    try {
-      if (currentStepIndex === -1) {
-        setCurrentData(initialData);
-        setSortedIndices(new Set());
-        return;
-      }
+    if (currentStepIndex === -1) {
+      setCurrentData(initialData);
+      setSortedIndices(new Set());
+      return;
+    }
 
-      const newData = Array.isArray(initialData) ? [...initialData] : (typeof initialData === 'object' ? {...initialData} : initialData);
-      const newSorted = new Set<number>();
+    const newData = Array.isArray(initialData) ? [...initialData] : (typeof initialData === 'object' ? {...initialData} : initialData);
+    const newSorted = new Set<number>();
 
-      for (let i = 0; i <= currentStepIndex; i++) {
-        applyStep(steps[i], newData, newSorted);
-      }
+    for (let i = 0; i <= currentStepIndex; i++) {
+      applyStep(steps[i], newData, newSorted);
+    }
 
-      setCurrentData(newData);
-      setSortedIndices(newSorted);
+    setCurrentData(newData);
+    setSortedIndices(newSorted);
 
-      if (currentStepIndex === steps.length - 1 && steps.length > 0) {
-        completeAlgorithm(algorithm.id);
-      }
-    } catch (e) {
-      console.error('Error during step processing:', e);
-      setError('An error occurred during visualization.');
+    if (currentStepIndex === steps.length - 1 && steps.length > 0) {
+      completeAlgorithm(algorithm.id);
     }
 
     if (isPredictionMode && !showPrediction && currentStepIndex < steps.length - 1) {
@@ -119,9 +112,7 @@ export default function VisualizerScreen() {
 
     if (step.variables?.array && Array.isArray(data)) {
         step.variables.array.forEach((val: number, idx: number) => {
-          if (idx >= 0 && idx < data.length) {
-            data[idx] = val;
-          }
+          if (idx >= 0 && idx < data.length) data[idx] = val;
         });
     }
 
@@ -162,6 +153,13 @@ export default function VisualizerScreen() {
     return <ArrayVisualizer data={currentData} currentEvent={currentEvent} sortedIndices={sortedIndices} />;
   };
 
+  const legendItems = [
+    { color: colors.compare, label: 'Comparing' },
+    { color: colors.swap, label: 'Swapping' },
+    { color: colors.active, label: 'Active/Visited' },
+    { color: colors.sorted, label: 'Sorted/Found' },
+  ];
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen
@@ -169,29 +167,16 @@ export default function VisualizerScreen() {
           title: algorithm.name,
           headerRight: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-               <TouchableOpacity
-                onPress={() => toggleFavorite(algorithm.id)}
-                style={styles.settingsBtn}
-              >
-                <Heart
-                  color={isFavorite(algorithm.id) ? colors.error : colors.textSecondary}
-                  fill={isFavorite(algorithm.id) ? colors.error : 'transparent'}
-                  size={18}
-                />
+               <TouchableOpacity onPress={() => toggleFavorite(algorithm.id)} style={styles.headerBtn}>
+                <Heart color={isFavorite(algorithm.id) ? colors.error : colors.textSecondary} fill={isFavorite(algorithm.id) ? colors.error : 'transparent'} size={18} />
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setIsAITutorVisible(true)}
-                style={styles.settingsBtn}
-              >
+              <TouchableOpacity onPress={() => setIsAITutorVisible(true)} style={styles.headerBtn}>
                 <Sparkles color={colors.primary} size={18} />
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setIsPredictionMode(!isPredictionMode)}
-                style={[styles.settingsBtn, isPredictionMode && { opacity: 1 }]}
-              >
+              <TouchableOpacity onPress={() => setIsPredictionMode(!isPredictionMode)} style={[styles.headerBtn, isPredictionMode && { opacity: 1 }]}>
                 <Brain color={isPredictionMode ? colors.primary : colors.textSecondary} size={18} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsInputModalVisible(true)} style={styles.settingsBtn}>
+              <TouchableOpacity onPress={() => setIsInputModalVisible(true)} style={styles.headerBtn}>
                 <Settings2 color={colors.primary} size={18} />
               </TouchableOpacity>
             </View>
@@ -201,7 +186,6 @@ export default function VisualizerScreen() {
 
       <ErrorBoundary>
         <View style={[styles.mainLayout, isDesktop && styles.desktopLayout]}>
-          {/* Code Section - Full Left (40%) */}
           <View style={[styles.codeSection, isDesktop && styles.desktopCodeSection]}>
             <CodeViewer
               code={algorithm.code}
@@ -212,9 +196,7 @@ export default function VisualizerScreen() {
             />
           </View>
 
-          {/* Right Section (60%) */}
           <View style={[styles.rightSection, isDesktop && styles.desktopRightSection]}>
-             {/* Animation Canvas - Top 2/3 */}
              <View style={styles.vizCanvas}>
                 <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '08' }]}>
                   {showPrediction && nextEvent ? (
@@ -225,9 +207,26 @@ export default function VisualizerScreen() {
                     />
                   ) : renderVisualizer()}
                 </View>
+
+                {/* Color Legend in UI */}
+                <View style={styles.legendContainer}>
+                   <TouchableOpacity onPress={() => setShowLegend(!showLegend)} style={styles.legendToggle}>
+                      <Info size={16} color={colors.textSecondary} />
+                      <ThemedText variant="caption"> Legend</ThemedText>
+                   </TouchableOpacity>
+                   {showLegend && (
+                     <View style={[styles.legendBox, { backgroundColor: colors.backgroundElement, borderColor: colors.backgroundSelected }]}>
+                        {legendItems.map((item, idx) => (
+                          <View key={idx} style={styles.legendItem}>
+                            <View style={[styles.colorBox, { backgroundColor: item.color }]} />
+                            <ThemedText variant="caption">{item.label}</ThemedText>
+                          </View>
+                        ))}
+                     </View>
+                   )}
+                </View>
              </View>
 
-             {/* Bottom 1/3: Variables, Description, Controls */}
              <View style={styles.bottomSection}>
                 <View style={styles.metadataPanel}>
                   {currentEvent?.variables && (
@@ -299,15 +298,15 @@ const styles = StyleSheet.create({
   },
   rightSection: {
     flex: 1,
-    backgroundColor: 'transparent',
   },
   desktopRightSection: {
     flex: 0.6,
     height: '100%',
   },
   vizCanvas: {
-    flex: 2, // Top 2/3
+    flex: 2,
     padding: Spacing.four,
+    position: 'relative',
   },
   vizContainer: {
     flex: 1,
@@ -315,15 +314,44 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
   },
+  legendContainer: {
+    position: 'absolute',
+    bottom: Spacing.six,
+    right: Spacing.six,
+    alignItems: 'flex-end',
+  },
+  legendToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 20,
+  },
+  legendBox: {
+    marginTop: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 8,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  colorBox: {
+    width: 12,
+    height: 12,
+    borderRadius: 3,
+  },
   bottomSection: {
-    flex: 1, // Bottom 1/3
+    flex: 1,
     padding: Spacing.four,
     borderTopWidth: 1,
     borderTopColor: '#eeeeee22',
   },
   metadataPanel: {
     flex: 1,
-    justifyContent: 'flex-start',
   },
   descriptionRow: {
     marginTop: Spacing.two,
@@ -352,7 +380,7 @@ const styles = StyleSheet.create({
   controlsSection: {
     marginTop: 'auto',
   },
-  settingsBtn: {
+  headerBtn: {
     marginLeft: Spacing.three,
     opacity: 0.8,
   }
