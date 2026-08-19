@@ -100,7 +100,7 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
         labels.push(key);
       }
     }
-    return labels.length > 0 ? labels.join(',') : undefined;
+    return labels.length > 0 ? labels.join(', ') : undefined;
   };
 
   return (

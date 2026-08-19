@@ -12,20 +12,57 @@ export const selectionSort: AlgorithmDefinition = {
   },
   visualizationType: 'BAR',
   defaultInput: [29, 10, 14, 37, 13],
-  code: `function selectionSort(arr) {
-  const n = arr.length;
-  for (let i = 0; i < n - 1; i++) {
-    let minIdx = i;
-    for (let j = i + 1; j < n; j++) {
-      if (arr[j] < arr[minIdx]) {
-        minIdx = j;
-      }
+  code: {
+    cpp: `void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n-1; i++) {
+        int min_idx = i;
+        for (int j = i+1; j < n; j++)
+            if (arr[j] < arr[min_idx])
+                min_idx = j;
+        swap(arr[min_idx], arr[i]);
     }
-    if (minIdx !== i) {
-      [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
-    }
-  }
 }`,
+    java: `void sort(int arr[]) {
+    int n = arr.length;
+    for (int i = 0; i < n-1; i++) {
+        int min_idx = i;
+        for (int j = i+1; j < n; j++)
+            if (arr[j] < arr[min_idx])
+                min_idx = j;
+        int temp = arr[min_idx];
+        arr[min_idx] = arr[i];
+        arr[i] = temp;
+    }
+}`,
+    python: `def selectionSort(arr):
+    for i in range(len(arr)):
+        min_idx = i
+        for j in range(i+1, len(arr)):
+            if arr[min_idx] > arr[j]:
+                min_idx = j
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]`,
+    javascript: `function selectionSort(arr) {
+    for (let i = 0; i < arr.length; i++) {
+        let minIdx = i;
+        for (let j = i + 1; j < arr.length; j++) {
+            if (arr[j] < arr[minIdx]) minIdx = j;
+        }
+        [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+    }
+}`,
+    kotlin: `fun selectionSort(arr: IntArray) {
+    val n = arr.size
+    for (i in 0 until n - 1) {
+        var min_idx = i
+        for (j in i + 1 until n)
+            if (arr[j] < arr[min_idx])
+                min_idx = j
+        val temp = arr[min_idx]
+        arr[min_idx] = arr[i]
+        arr[i] = temp
+    }
+}`
+  },
   generateSteps: (input: number[]): VisualizationEvent[] => {
     const steps: VisualizationEvent[] = [];
     const arr = [...input];

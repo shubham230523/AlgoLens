@@ -126,7 +126,7 @@ export function TreeVisualizer({ data, currentEvent, sortedIndices }: TreeVisual
   };
 
   const accessibilityLabel = useMemo(() => {
-    const values = data.join(', ');
+    const values = Array.isArray(data) ? data.join(', ') : '';
     const eventDesc = currentEvent ? `. Current step: ${currentEvent.description}` : '';
     return `Tree visualization with nodes: ${values}${eventDesc}`;
   }, [data, currentEvent]);

@@ -12,14 +12,33 @@ export const linearSearch: AlgorithmDefinition = {
   },
   visualizationType: 'BAR',
   defaultInput: { array: [10, 50, 30, 70, 80, 60, 20, 90, 40], target: 20 },
-  code: `function linearSearch(arr, target) {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i] === target) {
-      return i;
-    }
-  }
-  return -1;
+  code: {
+    cpp: `int search(int arr[], int n, int x) {
+    for (int i = 0; i < n; i++)
+        if (arr[i] == x) return i;
+    return -1;
 }`,
+    java: `int search(int arr[], int x) {
+    for (int i = 0; i < arr.length; i++)
+        if (arr[i] == x) return i;
+    return -1;
+}`,
+    python: `def search(arr, x):
+    for i in range(len(arr)):
+        if arr[i] == x: return i
+    return -1`,
+    javascript: `function linearSearch(arr, target) {
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === target) return i;
+    }
+    return -1;
+}`,
+    kotlin: `fun search(arr: IntArray, x: Int): Int {
+    for (i in arr.indices)
+        if (arr[i] == x) return i
+    return -1
+}`
+  },
   generateSteps: (input: { array: number[], target: number }): VisualizationEvent[] => {
     const steps: VisualizationEvent[] = [];
     const { array, target } = input;

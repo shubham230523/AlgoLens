@@ -21,7 +21,7 @@ function constructSystemPrompt(context: TutorContext): string {
   if (currentEvent) {
     eventContext = `Currently, the algorithm is performing a ${currentEvent.type} operation.
 Description: ${currentEvent.description}
-Active Indices: ${currentEvent.indices.join(', ')}
+Active Indices: ${currentEvent.indices?.join(', ') || 'None'}
 Variables State: ${JSON.stringify(currentEvent.variables || {})}`;
   }
 

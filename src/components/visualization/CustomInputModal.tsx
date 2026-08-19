@@ -20,11 +20,15 @@ export function CustomInputModal({ isVisible, onClose, onSubmit, initialValue, t
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
 
-  const [rawInput, setRawInput] = useState(
-    Array.isArray(initialValue)
-      ? initialValue.join(', ')
-      : initialValue.array.join(', ')
-  );
+  const [rawInput, setRawInput] = useState(() => {
+    if (Array.isArray(initialValue)) {
+      return initialValue.join(', ');
+    }
+    if (initialValue && typeof initialValue === 'object' && initialValue.array) {
+      return initialValue.array.join(', ');
+    }
+    return '';
+  });
 
   const [target, setTarget] = useState(
     type === 'SEARCH' ? String(initialValue.target) : ''

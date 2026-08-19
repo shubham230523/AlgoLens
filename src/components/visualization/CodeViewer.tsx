@@ -8,7 +8,6 @@ import { useColorScheme } from 'react-native';
 import { Copy, Check } from 'lucide-react-native';
 import { ThemedText } from '../ui/ThemedText';
 import * as Clipboard from 'expo-clipboard';
-import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { SupportedLanguage } from '@/types/algorithm';
 
 interface CodeViewerProps {
@@ -26,8 +25,8 @@ const GEMINI_DARK = {
   border: '#3c4043',
   text: '#e3e3e3',
   comment: '#9aa0a6',
-  highlight: 'rgba(138, 180, 248, 0.25)', // Increased opacity for matching/contrast
-  highlightBorder: '#8ab4f8',
+  highlight: 'rgba(108, 99, 255, 0.35)', // More visible theme-matched color
+  highlightBorder: '#6C63FF', // Primary theme color
 };
 
 const FONT_MONO = Platform.select({
@@ -56,17 +55,6 @@ export function CodeViewer({
   // Base constants for layout calculation
   const LINE_HEIGHT = 24;
   const PADDING_TOP = 12;
-
-  const animatedHighlightStyle = useAnimatedStyle(() => {
-    if (activeLine === undefined || activeLine < 1) return { opacity: 0, transform: [{ translateY: 0 }] };
-
-    return {
-      opacity: 1,
-      transform: [
-        { translateY: withSpring((activeLine - 1) * LINE_HEIGHT + PADDING_TOP, { damping: 20, stiffness: 100 }) }
-      ]
-    };
-  });
 
   useEffect(() => {
     if (activeLine !== undefined && activeLine > 0 && verticalScrollRef.current) {
@@ -140,8 +128,7 @@ export function CodeViewer({
           showsHorizontalScrollIndicator={true}
         >
           <View style={styles.codeWrapper}>
-            {/* Highlighted Chipped Line - Match contrast color */}
-            <Animated.View style={[styles.floatingHighlight, animatedHighlightStyle]} />
+            {/* Remove floatingHighlight as requested (remove chip) */}
 
             <SyntaxHighlighter
               language={selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage}
@@ -150,7 +137,7 @@ export function CodeViewer({
                 backgroundColor: 'transparent',
                 padding: 0,
                 margin: 0,
-                overflow: 'visible', // CRITICAL: Prevent internal scrollbars
+                overflow: 'visible',
               }}
               highlighter="prism"
               fontSize={13}
@@ -164,12 +151,15 @@ export function CodeViewer({
                 backgroundColor: 'transparent',
                 fontFamily: FONT_MONO,
               }}
-              lineProps={() => ({
+              lineProps={(lineNumber: number) => ({
                 style: {
                   height: LINE_HEIGHT,
                   flexDirection: 'row',
                   alignItems: 'center',
                   paddingLeft: 4,
+                  backgroundColor: lineNumber === activeLine ? GEMINI_DARK.highlight : 'transparent',
+                  borderLeftWidth: lineNumber === activeLine ? 4 : 0,
+                  borderLeftColor: GEMINI_DARK.highlightBorder,
                 },
               })}
             >
@@ -229,16 +219,5 @@ const styles = StyleSheet.create({
   codeWrapper: {
     position: 'relative',
     flex: 1,
-  },
-  floatingHighlight: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 24,
-    backgroundColor: GEMINI_DARK.highlight,
-    borderLeftWidth: 4, // More prominent indicator
-    borderLeftColor: GEMINI_DARK.highlightBorder,
-    zIndex: -1,
-    borderRadius: 2, // Chipped line effect
   }
 });

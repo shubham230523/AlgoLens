@@ -15,12 +15,34 @@ export const bstSearch: AlgorithmDefinition = {
     tree: [50, 30, 70, 20, 40, 60, 80],
     target: 60
   },
-  code: `function search(root, target) {
-  if (!root) return null;
-  if (root.val === target) return root;
-  if (target < root.val) return search(root.left, target);
-  return search(root.right, target);
+  code: {
+    cpp: `Node* search(Node* root, int key) {
+    if (root == NULL || root->key == key) return root;
+    if (root->key < key) return search(root->right, key);
+    return search(root->left, key);
 }`,
+    java: `public Node search(Node root, int key) {
+    if (root==null || root.key==key) return root;
+    if (root.key < key) return search(root.right, key);
+    return search(root.left, key);
+}`,
+    python: `def search(root, key):
+    if root is None or root.val == key:
+        return root
+    if root.val < key:
+        return search(root.right, key)
+    return search(root.left, key)`,
+    javascript: `function search(root, target) {
+    if (!root || root.val === target) return root;
+    if (target < root.val) return search(root.left, target);
+    return search(root.right, target);
+}`,
+    kotlin: `fun search(root: Node?, key: Int): Node? {
+    if (root == null || root.key == key) return root
+    if (root.key < key) return search(root.right, key)
+    return search(root.left, key)
+}`
+  },
   generateSteps: (input: { tree: number[], target: number }): VisualizationEvent[] => {
     const steps: VisualizationEvent[] = [];
     const { tree, target } = input;
