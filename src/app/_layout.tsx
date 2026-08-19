@@ -1,11 +1,10 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
 import { useEffect, useState } from 'react';
 import { loadAppAssets } from '@/lib/assetManager';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-
-import AppTabs from '@/components/app-tabs';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,7 +34,25 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <AppTabs />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="visualizer/[id]"
+            options={{
+                headerShown: true,
+                title: 'Visualizer',
+                headerBackTitle: 'Back'
+            }}
+          />
+          <Stack.Screen
+            name="path/[id]"
+            options={{
+                headerShown: true,
+                title: 'Learning Path',
+                headerBackTitle: 'Back'
+            }}
+          />
+        </Stack>
       </ThemeProvider>
     </ErrorBoundary>
   );

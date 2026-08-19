@@ -3,7 +3,7 @@ import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/theme';
 import { Home, Compass, Heart, Settings } from 'lucide-react-native';
 
-export default function AppTabs() {
+export default function TabLayout() {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
 
