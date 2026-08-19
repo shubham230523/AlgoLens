@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import SyntaxHighlighter from 'react-native-syntax-highlighter';
-import { atomDark } from 'react-syntax-highlighter/dist/styles/prism';
+import { atomDark, prism } from 'react-syntax-highlighter/dist/styles/prism';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { Copy, Check } from 'lucide-react-native';
@@ -25,21 +25,20 @@ const GEMINI_DARK = {
   border: '#3c4043',
   text: '#e3e3e3',
   comment: '#9aa0a6',
-  highlight: 'rgba(138, 180, 248, 0.12)',
+  highlight: 'rgba(138, 180, 248, 0.15)',
   highlightBorder: '#8ab4f8',
 };
 
-// Gemini Font Families (with fallback)
 const FONT_MONO = Platform.select({
   ios: 'Menlo',
   android: 'monospace',
-  web: '"Google Sans Code", "Roboto Mono", "Source Code Pro", monospace',
+  web: '"Google Sans Code", "Roboto Mono", monospace',
 });
 
 const FONT_SANS = Platform.select({
   ios: 'System',
   android: 'sans-serif',
-  web: '"Google Sans", "Product Sans", system-ui, sans-serif',
+  web: '"Google Sans", "Product Sans", sans-serif',
 });
 
 export function CodeViewer({
@@ -52,24 +51,27 @@ export function CodeViewer({
   const [copied, setCopied] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // Base constants for layout calculation
   const LINE_HEIGHT = 24;
-  const PADDING_TOP = Spacing.two;
+  const PADDING_TOP = 12; // Controlled padding
 
   const animatedHighlightStyle = useAnimatedStyle(() => {
-    if (activeLine === undefined || activeLine < 1) return { opacity: 0 };
+    // Hide highlighter if no active line or line is 0
+    if (activeLine === undefined || activeLine < 1) return { opacity: 0, transform: [{ translateY: 0 }] };
+
     return {
       opacity: 1,
       transform: [
-        { translateY: withSpring((activeLine - 1) * LINE_HEIGHT + PADDING_TOP, { damping: 25, stiffness: 120 }) }
+        { translateY: withSpring((activeLine - 1) * LINE_HEIGHT + PADDING_TOP, { damping: 20, stiffness: 100 }) }
       ]
     };
   });
 
   useEffect(() => {
-    if (activeLine !== undefined && scrollViewRef.current) {
+    if (activeLine !== undefined && activeLine > 0 && scrollViewRef.current) {
       const scrollPosition = (activeLine - 1) * LINE_HEIGHT;
       scrollViewRef.current.scrollTo({
-        y: Math.max(0, scrollPosition - (isDesktop ? 200 : 100)),
+        y: Math.max(0, scrollPosition - (isDesktop ? 180 : 100)),
         animated: true,
       });
     }
@@ -90,15 +92,8 @@ export function CodeViewer({
   ];
 
   return (
-    <View style={[styles.container, {
-      backgroundColor: GEMINI_DARK.background,
-      borderColor: GEMINI_DARK.border
-    }]}>
-      {/* Header with Language Selector and Copy */}
-      <View style={[styles.header, {
-        backgroundColor: GEMINI_DARK.headerBg,
-        borderBottomColor: GEMINI_DARK.border
-      }]}>
+    <View style={[styles.container, { backgroundColor: GEMINI_DARK.background, borderColor: GEMINI_DARK.border }]}>
+      <View style={[styles.header, { backgroundColor: GEMINI_DARK.headerBg, borderBottomColor: GEMINI_DARK.border }]}>
         <View style={styles.langSelector}>
           {languages.map((lang) => (
             <TouchableOpacity
@@ -114,7 +109,7 @@ export function CodeViewer({
                 style={[
                   styles.langText,
                   { fontFamily: FONT_SANS },
-                  selectedLanguage === lang.value && { color: GEMINI_DARK.highlightBorder, fontWeight: '600' }
+                  selectedLanguage === lang.value && { color: GEMINI_DARK.highlightBorder, fontWeight: 'bold' }
                 ]}
               >
                 {lang.label}
@@ -132,15 +127,10 @@ export function CodeViewer({
         ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={[styles.scrollContent, { paddingTop: PADDING_TOP }]}
+        showsVerticalScrollIndicator={true}
       >
         <View style={styles.codeWrapper}>
-          {/* Smooth Execution Highlighter */}
-          <Animated.View style={[
-            styles.floatingHighlight,
-            { backgroundColor: GEMINI_DARK.highlight,
-              borderLeftColor: GEMINI_DARK.highlightBorder },
-            animatedHighlightStyle
-          ]} />
+          <Animated.View style={[styles.floatingHighlight, animatedHighlightStyle]} />
 
           <SyntaxHighlighter
             language={selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage}
@@ -149,6 +139,7 @@ export function CodeViewer({
               backgroundColor: 'transparent',
               padding: 0,
               margin: 0,
+              overflow: 'visible', // CRITICAL: Prevent internal scrollbars
             }}
             highlighter="prism"
             fontSize={13}
@@ -214,17 +205,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: Spacing.four,
+    paddingBottom: 24, // Extra space at bottom
   },
   codeWrapper: {
     position: 'relative',
+    flex: 1,
   },
   floatingHighlight: {
     position: 'absolute',
     left: 0,
     right: 0,
     height: 24,
+    backgroundColor: GEMINI_DARK.highlight,
     borderLeftWidth: 3,
-    zIndex: 0,
+    borderLeftColor: GEMINI_DARK.highlightBorder,
+    zIndex: -1, // Keep behind text
   }
 });

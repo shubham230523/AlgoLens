@@ -39,6 +39,7 @@ public:
     }
 };`,
     java: `class Solution {
+    //
     public void mergeSort(int[] arr, int l, int r) {
         if (l >= r) return;
         int m = l + (r - l) / 2;
@@ -64,6 +65,7 @@ public:
     }
 }`,
     python: `class Solution:
+    #
     def mergeSort(self, arr, l, r):
         if l >= r: return
         m = l + (r - l) // 2
@@ -75,6 +77,8 @@ public:
         n1, n2 = m - l + 1, r - m
         L = arr[l : m + 1]
         R = arr[m + 1 : r + 1]
+        #
+        #
         i, j, k = 0, 0, l
         while i < n1 and j < n2:
             if L[i] <= R[j]:
@@ -87,6 +91,7 @@ public:
         while j < n2:
             arr[k] = R[j]; j += 1; k += 1`,
     javascript: `class Solution {
+  //
   mergeSort(arr, left, right) {
     if (left >= right) return;
     const mid = Math.floor((left + right) / 2);
@@ -100,6 +105,8 @@ public:
     const n2 = right - mid;
     const L = arr.slice(left, mid + 1);
     const R = arr.slice(mid + 1, right + 1);
+    #
+    #
     let i = 0, j = 0, k = left;
     while (i < n1 && j < n2) {
       if (L[i] <= R[j]) arr[k++] = L[i++];
@@ -110,6 +117,7 @@ public:
   }
 }`,
     kotlin: `class Solution {
+    //
     fun mergeSort(arr: IntArray, l: Int, r: Int) {
         if (l >= r) return
         val m = l + (r - l) / 2
@@ -123,6 +131,8 @@ public:
         val n2 = r - m
         val L = arr.sliceArray(l..m)
         val R = arr.sliceArray(m + 1..r)
+        #
+        #
         var i = 0; var j = 0; var k = l
         while (i < n1 && j < n2) {
             if (L[i] <= R[j]) arr[k++] = L[i++]
