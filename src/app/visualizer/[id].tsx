@@ -16,7 +16,7 @@ import { PredictionOverlay } from '@/components/visualization/PredictionOverlay'
 import { CodeViewer } from '@/components/visualization/CodeViewer';
 import { AITutorModal } from '@/components/visualization/AITutorModal';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Settings2, Brain, Heart, Code, Sparkles } from 'lucide-react-native';
+import { Settings2, Brain, Heart, Sparkles } from 'lucide-react-native';
 import { SupportedLanguage } from '@/types/algorithm';
 
 export default function VisualizerScreen() {
@@ -216,7 +216,7 @@ export default function VisualizerScreen() {
           <View style={[styles.rightSection, isDesktop && styles.desktopRightSection]}>
              {/* Animation Canvas - Top 2/3 */}
              <View style={styles.vizCanvas}>
-                <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '11' }]}>
+                <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '08' }]}>
                   {showPrediction && nextEvent ? (
                     <PredictionOverlay
                       nextEvent={nextEvent}
@@ -292,7 +292,6 @@ const styles = StyleSheet.create({
   codeSection: {
     flex: 1,
     padding: Spacing.two,
-    backgroundColor: '#1e1f20',
   },
   desktopCodeSection: {
     flex: 0.4,
@@ -330,9 +329,9 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
   stepDescription: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '500',
-    lineHeight: 30,
+    lineHeight: 28,
   },
   variablesPanel: {
     marginBottom: Spacing.two,
