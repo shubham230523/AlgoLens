@@ -71,11 +71,11 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.five,
   },
   section: {
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.four,
   },
   sectionTitle: {
     paddingHorizontal: Spacing.four,
-    marginBottom: Spacing.two,
+    marginBottom: Spacing.three,
   },
   horizontalList: {
     gap: Spacing.three,
@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     paddingHorizontal: Spacing.four,
+    gap: Spacing.two,
   },
   categoryCard: {
     minWidth: 120,

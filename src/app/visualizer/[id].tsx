@@ -17,6 +17,7 @@ import { CodeViewer } from '@/components/visualization/CodeViewer';
 import { AITutorModal } from '@/components/visualization/AITutorModal';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Settings2, Brain, Heart, Code, Sparkles } from 'lucide-react-native';
+import { Button } from '@/components/ui/Button';
 
 export default function VisualizerScreen() {
   const { id } = useLocalSearchParams();

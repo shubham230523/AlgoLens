@@ -53,13 +53,15 @@ export function CustomTabList(props: TabListProps) {
 
   return (
     <View {...props} style={styles.tabListOuter}>
-      <View style={styles.tabListContainer}>
+      <View style={[styles.tabListContainer, { backgroundColor: colors.background }]}>
         <ThemedView type="backgroundElement" style={styles.innerContainer}>
           <ThemedText type="smallBold" style={styles.brandText}>
             AlgoLens
           </ThemedText>
 
-          {props.children}
+          <View style={styles.tabButtonsRow}>
+            {props.children}
+          </View>
 
           <ExternalLink href="https://docs.expo.dev" asChild>
             <Pressable style={styles.externalPressable}>
@@ -103,7 +105,14 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
   },
   brandText: {
-    marginRight: 'auto',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  tabButtonsRow: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+    flex: 1,
+    justifyContent: 'center',
   },
   pressed: {
     opacity: 0.7,

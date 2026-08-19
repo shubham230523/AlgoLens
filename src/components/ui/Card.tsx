@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ViewStyle, Pressable } from 'react-native';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 
@@ -13,8 +13,6 @@ interface CardProps {
 export function Card({ children, style, onPress, variant = 'default' }: CardProps) {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
-
-  const Container = onPress ? TouchableOpacity : View;
 
   const variantStyles = StyleSheet.create({
     default: {
@@ -36,17 +34,20 @@ export function Card({ children, style, onPress, variant = 'default' }: CardProp
   });
 
   return (
-    <Container
+    <Pressable
       onPress={onPress}
-      activeOpacity={0.7}
-      style={[
+      style={({ pressed }) => [
         styles.card,
         variantStyles[variant],
         style,
+        pressed && onPress && { opacity: 0.7, transform: [{ scale: 0.99 }] },
       ]}
+      pointerEvents="auto"
     >
-      {children}
-    </Container>
+      <View pointerEvents="none">
+        {children}
+      </View>
+    </Pressable>
   );
 }
 
