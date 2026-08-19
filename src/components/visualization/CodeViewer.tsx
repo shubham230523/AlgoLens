@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import SyntaxHighlighter from 'react-native-syntax-highlighter';
-import { atomDark, prism } from 'react-syntax-highlighter/dist/styles/prism';
+import { atomDark } from 'react-syntax-highlighter/dist/styles/prism';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { Copy, Check } from 'lucide-react-native';
@@ -18,16 +18,29 @@ interface CodeViewerProps {
   selectedLanguage: SupportedLanguage;
 }
 
-// Refined Light Gemini-style colors
-const LIGHT_GEMINI = {
-  background: '#ffffff',
-  headerBg: '#f8f9fa',
-  border: '#e0e0e0',
-  text: '#3c4043',
-  comment: '#70757a',
-  highlight: 'rgba(26, 115, 232, 0.1)',
-  highlightBorder: '#1a73e8',
+// Premium Gemini Dark Theme Colors
+const GEMINI_DARK = {
+  background: '#131314',
+  headerBg: '#1e1f20',
+  border: '#3c4043',
+  text: '#e3e3e3',
+  comment: '#9aa0a6',
+  highlight: 'rgba(138, 180, 248, 0.12)',
+  highlightBorder: '#8ab4f8',
 };
+
+// Gemini Font Families (with fallback)
+const FONT_MONO = Platform.select({
+  ios: 'Menlo',
+  android: 'monospace',
+  web: '"Roboto Mono", "Source Code Pro", monospace',
+});
+
+const FONT_SANS = Platform.select({
+  ios: 'System',
+  android: 'sans-serif',
+  web: '"Google Sans", "Product Sans", system-ui, sans-serif',
+});
 
 export function CodeViewer({
   code,
@@ -36,8 +49,6 @@ export function CodeViewer({
   onLanguageChange,
   selectedLanguage
 }: CodeViewerProps) {
-  const scheme = useColorScheme() ?? 'light';
-  const isDark = scheme === 'dark';
   const [copied, setCopied] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -49,7 +60,7 @@ export function CodeViewer({
     return {
       opacity: 1,
       transform: [
-        { translateY: withSpring((activeLine - 1) * LINE_HEIGHT + PADDING_TOP, { damping: 20, stiffness: 100 }) }
+        { translateY: withSpring((activeLine - 1) * LINE_HEIGHT + PADDING_TOP, { damping: 25, stiffness: 120 }) }
       ]
     };
   });
@@ -80,13 +91,13 @@ export function CodeViewer({
 
   return (
     <View style={[styles.container, {
-      backgroundColor: isDark ? '#1e1f20' : LIGHT_GEMINI.background,
-      borderColor: isDark ? '#3c4043' : LIGHT_GEMINI.border
+      backgroundColor: GEMINI_DARK.background,
+      borderColor: GEMINI_DARK.border
     }]}>
       {/* Header with Language Selector and Copy */}
       <View style={[styles.header, {
-        backgroundColor: isDark ? '#1e1f20' : LIGHT_GEMINI.headerBg,
-        borderBottomColor: isDark ? '#3c4043' : LIGHT_GEMINI.border
+        backgroundColor: GEMINI_DARK.headerBg,
+        borderBottomColor: GEMINI_DARK.border
       }]}>
         <View style={styles.langSelector}>
           {languages.map((lang) => (
@@ -95,14 +106,15 @@ export function CodeViewer({
               onPress={() => onLanguageChange?.(lang.value)}
               style={[
                 styles.langBtn,
-                selectedLanguage === lang.value && { borderBottomColor: LIGHT_GEMINI.highlightBorder }
+                selectedLanguage === lang.value && { borderBottomColor: GEMINI_DARK.highlightBorder }
               ]}
             >
               <ThemedText
                 variant="caption"
                 style={[
                   styles.langText,
-                  selectedLanguage === lang.value && { color: LIGHT_GEMINI.highlightBorder, fontWeight: 'bold' }
+                  { fontFamily: FONT_SANS },
+                  selectedLanguage === lang.value && { color: GEMINI_DARK.highlightBorder, fontWeight: '600' }
                 ]}
               >
                 {lang.label}
@@ -112,7 +124,7 @@ export function CodeViewer({
         </View>
 
         <TouchableOpacity onPress={copyToClipboard} style={styles.copyBtn}>
-          {copied ? <Check size={16} color={LIGHT_GEMINI.highlightBorder} /> : <Copy size={16} color={isDark ? '#9aa0a6' : LIGHT_GEMINI.comment} />}
+          {copied ? <Check size={16} color={GEMINI_DARK.highlightBorder} /> : <Copy size={16} color={GEMINI_DARK.comment} />}
         </TouchableOpacity>
       </View>
 
@@ -125,14 +137,14 @@ export function CodeViewer({
           {/* Smooth Execution Highlighter */}
           <Animated.View style={[
             styles.floatingHighlight,
-            { backgroundColor: isDark ? 'rgba(138, 180, 248, 0.15)' : LIGHT_GEMINI.highlight,
-              borderLeftColor: isDark ? '#8ab4f8' : LIGHT_GEMINI.highlightBorder },
+            { backgroundColor: GEMINI_DARK.highlight,
+              borderLeftColor: GEMINI_DARK.highlightBorder },
             animatedHighlightStyle
           ]} />
 
           <SyntaxHighlighter
             language={selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage}
-            style={isDark ? atomDark : prism}
+            style={atomDark}
             customStyle={{
               backgroundColor: 'transparent',
               padding: 0,
@@ -142,12 +154,13 @@ export function CodeViewer({
             fontSize={13}
             showLineNumbers={true}
             lineNumberStyle={{
-              minWidth: 35,
+              minWidth: 40,
               paddingRight: 15,
-              color: isDark ? '#9aa0a6' : '#999',
+              color: '#5f6368',
               textAlign: 'right',
               fontSize: 11,
               backgroundColor: 'transparent',
+              fontFamily: FONT_MONO,
             }}
             lineProps={() => ({
               style: {
@@ -191,7 +204,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   langText: {
-    color: '#70757a',
+    color: '#9aa0a6',
     fontSize: 12,
   },
   copyBtn: {
