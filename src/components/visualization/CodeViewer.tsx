@@ -33,7 +33,7 @@ const GEMINI_DARK = {
 const FONT_MONO = Platform.select({
   ios: 'Menlo',
   android: 'monospace',
-  web: '"Roboto Mono", "Source Code Pro", monospace',
+  web: '"Google Sans Code", "Roboto Mono", "Source Code Pro", monospace',
 });
 
 const FONT_SANS = Platform.select({
