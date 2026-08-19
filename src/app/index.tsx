@@ -37,13 +37,15 @@ export default function HomeScreen() {
 
       <View style={styles.section}>
         <ThemedText variant="h2" style={styles.sectionTitle}>Featured</ThemedText>
-        {featuredAlgorithms.map(algo => (
-          <AlgorithmCard
-            key={algo.id}
-            algorithm={algo}
-            onPress={() => router.push(`/visualizer/${algo.id}`)}
-          />
-        ))}
+        <View style={styles.cardContainer}>
+          {featuredAlgorithms.map(algo => (
+            <AlgorithmCard
+              key={algo.id}
+              algorithm={algo}
+              onPress={() => router.push(`/visualizer/${algo.id}`)}
+            />
+          ))}
+        </View>
       </View>
 
       <View style={styles.section}>
@@ -77,6 +79,9 @@ const styles = StyleSheet.create({
   },
   horizontalList: {
     gap: Spacing.three,
+    paddingHorizontal: Spacing.four,
+  },
+  cardContainer: {
     paddingHorizontal: Spacing.four,
   },
   categoryCard: {

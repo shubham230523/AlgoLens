@@ -1,44 +1,44 @@
-# Milestone 18: Production Hardening Implementation Plan
+# UI and Routing Fixes Implementation Plan
 
-This milestone focuses on making **AlgoLens** robust and resilient to errors. We will implement error boundaries, improve input validation, and ensure the app handles edge cases gracefully.
+This plan addresses several UI glitches and a routing issue reported by the user.
 
 ## Goal
-Harden the application for production use by implementing global error handling, robust validation, and safe data processing.
+Fix header overlapping, text cropping in learning paths, missing horizontal padding for cards, and non-functional card clicks.
 
 ## Proposed Changes
 
-### Global Error Handling
+### Navigation & Header
 
-#### [NEW] [ErrorBoundary.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ErrorBoundary.tsx)
-- Create a reusable `ErrorBoundary` component to catch runtime errors in the component tree.
-- Provide a user-friendly fallback UI with an option to reset the app or go back home.
+#### [app-tabs.web.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/app-tabs.web.tsx)
+- **Fix Overlap**: Change `tabListContainer` from `position: 'absolute'` to `position: 'relative'` (or ensure it doesn't float over content if absolute is desired for a specific look).
+- **Better Brand Text**: Update "Expo Starter" to "AlgoLens".
 
 #### [_layout.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/app/_layout.tsx)
-- Wrap the main application tree with the new `ErrorBoundary`.
+- Ensure the main content area has a `paddingTop` if the header is absolute.
 
-### Robust Input Validation
+### UI Components
 
-#### [CustomInputModal.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/visualization/CustomInputModal.tsx)
-- Add comprehensive validation for user-provided arrays (min/max size, numeric values only).
-- Add specific validation for searching algorithms (ensure target exists or handle "not found" cases gracefully).
-- Provide clear error messages to the user within the modal.
+#### [LearningPathCard.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ui/LearningPathCard.tsx)
+- **Fix Text Cropping**: Remove fixed `height: 32` from `styles.description` and use `minHeight` or let it flex naturally with `numberOfLines`.
 
-### Safe Data Processing
+#### [AlgorithmCard.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ui/AlgorithmCard.tsx)
+- **Fix Padding**: Add `paddingHorizontal: Spacing.four` (or similar) to ensure cards have breathing room on the sides.
 
-#### [VisualizerScreen.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/app/visualizer/[id].tsx)
-- Implement `try-catch` blocks around `generateSteps` and step-by-step state calculations.
-- Handle cases where an algorithm ID is invalid or its definition is missing.
-- Ensure that if an error occurs during visualization, the app doesn't crash but instead shows a clear error state or resets the view.
+#### [Card.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ui/Card.tsx)
+- **Fix Routing**: Ensure `onPress` is correctly handled. Verify if `TouchableOpacity` needs `onPress` passed directly.
+
+### Screen Layouts
+
+#### [HomeScreen.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/app/index.tsx)
+- **Fix Padding**: Wrap non-horizontal sections in a View with horizontal padding.
+- **Ensure Clickability**: Double check `onPress` handlers for `LearningPathCard` and `AlgorithmCard`.
 
 ---
 
 ## Verification Plan
 
-### Automated Tests
-- `npm run lint`: Ensure no new code quality issues.
-- Verify that the `ErrorBoundary` correctly catches a simulated error in a sub-component.
-
 ### Manual Verification
-- **Invalid Input Test**: Try to enter strings, extremely large arrays, or empty inputs in the `CustomInputModal` and verify that appropriate error messages are shown.
-- **Error Trigger Test**: Temporarily inject a `throw new Error()` in a visualization component and verify that the `ErrorBoundary` fallback UI appears.
-- **Edge Case Test**: Test the visualizer with a single-element array or an array of identical elements to ensure the engine handles them without crashing.
+- **Header Check**: Open the Web version and verify the header no longer crops the AlgoLens logo.
+- **Text Check**: Verify "Sorting Master" description is fully visible.
+- **Padding Check**: Ensure "Bubble Sort" card has consistent left/right margins.
+- **Routing Check**: Click on "Bubble Sort" and a Learning Path to ensure they navigate to the correct screens.

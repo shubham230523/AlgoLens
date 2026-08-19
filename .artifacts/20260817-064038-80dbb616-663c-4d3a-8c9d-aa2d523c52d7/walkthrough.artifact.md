@@ -218,5 +218,33 @@ Hardened the visualization engine's data processing:
 - **Crash Recovery**: Temporarily injected a crash into the Tree Visualizer. The Error Boundary successfully caught it and allowed a "Try Again" recovery without restarting the app.
 - **Edge Cases**: Verified that 1-element arrays and "Target Not Found" search scenarios are handled gracefully without visual glitches.
 
+## UI & Routing Fixes
+
+I have addressed the layout and navigation issues reported to ensure a consistent and functional experience across all platforms.
+
+### 1. Fixed Header Overlap (Web)
+Updated [app-tabs.web.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/app-tabs.web.tsx) to prevent the absolute-positioned header from cropping the main content:
+- **Spacer Implementation**: Wrapped the absolute header in an outer View with an explicit height. This reserves space in the layout, ensuring the "AlgoLens" logo and search/header content aren't obscured.
+- **Brand Update**: Changed the generic "Expo Starter" text to "AlgoLens".
+
+### 2. Learning Path Card Fixes
+Improved [LearningPathCard.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ui/LearningPathCard.tsx) to handle long text descriptions:
+- **Flexible Sizing**: Replaced the fixed `height: 32` with a `minHeight: 40`. This prevents text cropping while maintaining a consistent card height for a clean grid/list look.
+
+### 3. Home Screen Padding
+Enhanced the layout of [HomeScreen.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/app/index.tsx):
+- **Consistent Gutter**: Added `paddingHorizontal: Spacing.four` to the featured algorithm cards. This ensures they align perfectly with the section titles and don't touch the screen edges.
+
+### 4. Routing & Clickability
+- **Fixed Card Clicks**: Verified and ensured that `onPress` events on both `AlgorithmCard` and `LearningPathCard` correctly trigger navigation. The navigation now reliably points to `/visualizer/[id]` and `/path/[id]`.
+
+## Verification Results
+
+### Manual Verification
+- **Web Header**: Confirmed that the logo is fully visible and the header no longer floats over the top section of the screen.
+- **Card Content**: Verified that "Sorting Master" and "Search Pro" descriptions are fully readable without cropping.
+- **Padding**: Confirmed uniform 24px (Spacing.four) margins for all non-horizontal scrolling content on the Home screen.
+- **Navigation**: Tested every card on the Home screen to ensure it opens the correct destination screen.
+
 ## Next Steps
 Milestones 19 & 20: Testing & Release. Final verification and preparation for deployment.

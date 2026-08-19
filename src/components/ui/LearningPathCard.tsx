@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   },
   description: {
     marginBottom: Spacing.three,
-    height: 32,
+    minHeight: 40,
   },
   footer: {
     marginTop: 'auto',

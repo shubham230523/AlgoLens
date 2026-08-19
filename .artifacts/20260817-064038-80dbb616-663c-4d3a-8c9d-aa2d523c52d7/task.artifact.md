@@ -62,3 +62,10 @@
     - [x] Improve input validation in `CustomInputModal.tsx`
     - [x] Add safe data processing in `VisualizerScreen.tsx`
     - [x] Verify error handling and edge cases
+
+- [x] UI and Routing Fixes
+    - [x] Fix header overlap in `app-tabs.web.tsx`
+    - [x] Fix text cropping in `LearningPathCard.tsx`
+    - [x] Add horizontal padding to cards in `HomeScreen.tsx`
+    - [x] Fix card routing/click issue
+    - [x] Update brand text to "AlgoLens"
