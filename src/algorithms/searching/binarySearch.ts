@@ -30,13 +30,21 @@ export const binarySearch: AlgorithmDefinition = {
     let left = 0;
     let right = array.length - 1;
 
+    steps.push({
+      type: 'HIGHLIGHT',
+      indices: [],
+      description: `Searching for ${target} in the array`,
+      codeLine: 1,
+      variables: { target, left, right }
+    });
+
     while (left <= right) {
       const mid = Math.floor((left + right) / 2);
 
       steps.push({
-        type: 'HIGHLIGHT',
-        indices: [left, right],
-        description: `Narrowing search space to indices ${left} through ${right}`,
+        type: 'SUBARRAY_FOCUS',
+        indices: Array.from({ length: right - left + 1 }, (_, i) => left + i),
+        description: `Current search range: [${left}, ${right}]`,
         codeLine: 4,
         variables: { left, right, mid }
       });
@@ -44,7 +52,7 @@ export const binarySearch: AlgorithmDefinition = {
       steps.push({
         type: 'COMPARE',
         indices: [mid],
-        description: `Compare target ${target} with middle element ${array[mid]}`,
+        description: `Calculating mid: index ${mid} (value ${array[mid]})`,
         codeLine: 5,
         variables: { left, right, mid, target, current: array[mid] }
       });
@@ -64,7 +72,7 @@ export const binarySearch: AlgorithmDefinition = {
         steps.push({
           type: 'VISIT',
           indices: Array.from({ length: mid - left + 1 }, (_, i) => left + i),
-          description: `${array[mid]} < ${target}, ignoring left half`,
+          description: `${array[mid]} < ${target}, focusing on the right half`,
           codeLine: 7,
           variables: { left, right, mid, target }
         });
@@ -73,7 +81,7 @@ export const binarySearch: AlgorithmDefinition = {
         steps.push({
           type: 'VISIT',
           indices: Array.from({ length: right - mid + 1 }, (_, i) => mid + i),
-          description: `${array[mid]} > ${target}, ignoring right half`,
+          description: `${array[mid]} > ${target}, focusing on the left half`,
           codeLine: 8,
           variables: { left, right, mid, target }
         });

@@ -27,38 +27,69 @@ export const bubbleSort: AlgorithmDefinition = {
     const arr = [...input];
     const n = arr.length;
 
+    steps.push({
+      type: 'HIGHLIGHT',
+      indices: [],
+      description: 'Starting Bubble Sort',
+      codeLine: 1,
+      variables: { n }
+    });
+
     for (let i = 0; i < n; i++) {
+      steps.push({
+        type: 'HIGHLIGHT',
+        indices: [],
+        description: `Outer loop: i = ${i}. Building the sorted suffix.`,
+        codeLine: 3,
+        variables: { i, n }
+      });
+
       for (let j = 0; j < n - i - 1; j++) {
-        // Compare
         steps.push({
           type: 'COMPARE',
           indices: [j, j + 1],
-          description: `Compare ${arr[j]} and ${arr[j + 1]}`,
+          description: `Comparing elements at index ${j} and ${j + 1}`,
           codeLine: 5,
-          variables: { j, i, n }
+          variables: { i, j, n }
         });
 
         if (arr[j] > arr[j + 1]) {
-          // Swap
+          steps.push({
+            type: 'HIGHLIGHT',
+            indices: [j, j + 1],
+            description: `${arr[j]} > ${arr[j + 1]}, so we swap them.`,
+            codeLine: 6,
+            variables: { i, j, n }
+          });
+
           [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+
           steps.push({
             type: 'SWAP',
             indices: [j, j + 1],
-            description: `Swap ${arr[j + 1]} and ${arr[j]}`,
+            description: `Swapped ${arr[j+1]} and ${arr[j]}`,
             codeLine: 6,
-            variables: { j, i, n, array: [...arr] }
+            variables: { i, j, n, array: [...arr] }
           });
         }
       }
-      // Mark sorted
+
       steps.push({
         type: 'MARK_SORTED',
         indices: [n - i - 1],
-        description: `Element at index ${n - i - 1} is in its final sorted position`,
+        description: `Element at index ${n - i - 1} is now in its final position.`,
         codeLine: 3,
         variables: { i, n }
       });
     }
+
+    steps.push({
+      type: 'HIGHLIGHT',
+      indices: [],
+      description: 'Sorting complete!',
+      codeLine: 1,
+      variables: { n }
+    });
 
     return steps;
   },

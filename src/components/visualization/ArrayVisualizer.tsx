@@ -14,13 +14,14 @@ interface BarProps {
   maxVal: number;
   isFaded: boolean;
   isMerging: boolean;
+  label?: string;
 }
 
-const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, isMerging }: BarProps) => {
+const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, isMerging, label }: BarProps) => {
   const shouldReduceMotion = useReducedMotion();
 
-  // Static fallback values
-  const staticHeight = value * (180 / maxVal) + 30; // Slightly taller base height
+  // Static base height calculation
+  const staticHeight = value * (180 / maxVal) + 30;
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -34,21 +35,28 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, i
   });
 
   return (
-    <Animated.View
-      style={[
-        styles.bar,
-        {
-          width,
-          backgroundColor: color, // Fallback background
-          height: staticHeight, // Fallback height
-        },
-        animatedStyle
-      ]}
-    >
-      {width > 20 && (
-        <ThemedText variant="caption" style={styles.valueText}>{value}</ThemedText>
+    <View style={styles.barWrapper}>
+      {label && (
+        <View style={styles.pointerContainer}>
+          <ThemedText variant="caption" style={styles.pointerText}>{label}</ThemedText>
+        </View>
       )}
-    </Animated.View>
+      <Animated.View
+        style={[
+          styles.bar,
+          {
+            width,
+            backgroundColor: color,
+            height: staticHeight,
+          },
+          animatedStyle
+        ]}
+      >
+        {width > 22 && (
+          <ThemedText variant="caption" style={styles.valueText}>{value}</ThemedText>
+        )}
+      </Animated.View>
+    </View>
   );
 });
 
@@ -63,11 +71,9 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
   const colors = Colors[scheme];
   const { width: windowWidth } = useWindowDimensions();
 
-  // Safeguard: Ensure data is an array
   const safeData = Array.isArray(data) ? data : [];
   const maxVal = useMemo(() => safeData.length > 0 ? Math.max(...safeData, 1) : 1, [safeData]);
 
-  // Dynamic scaling logic
   const availableWidth = windowWidth - Spacing.eight;
   const barWidth = safeData.length > 0 ? Math.max(10, Math.min(45, (availableWidth / safeData.length) - 4)) : 40;
 
@@ -78,28 +84,29 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
       if (currentEvent.type === 'SWAP' || currentEvent.type === 'MERGE_STEP') return colors.swap;
       return colors.active;
     }
-    return scheme === 'dark' ? '#2A334D' : '#E0E0E6'; // More distinct default color
+    return scheme === 'dark' ? '#2A334D' : '#E0E0E6';
   };
 
-  const accessibilityLabel = useMemo(() => {
-    const values = safeData.join(', ');
-    const eventDesc = currentEvent ? `. Current step: ${currentEvent.description}` : '';
-    return `Algorithm visualization array with ${safeData.length} elements: ${values}${eventDesc}`;
-  }, [safeData, currentEvent]);
+  const getLabelForIndex = (index: number) => {
+    if (!currentEvent?.variables) return undefined;
+    const labels = [];
+    for (const [key, val] of Object.entries(currentEvent.variables)) {
+      if (val === index && ['i', 'j', 'low', 'high', 'mid', 'left', 'right', 'pivot'].includes(key)) {
+        labels.push(key);
+      }
+    }
+    return labels.length > 0 ? labels.join(',') : undefined;
+  };
 
   return (
-    <View
-      style={styles.container}
-      accessibilityRole="image"
-      accessibilityLabel={accessibilityLabel}
-    >
+    <View style={styles.container}>
       {safeData.map((value, index) => {
         const isFaded = !!(currentEvent?.type === 'SUBARRAY_FOCUS' && !currentEvent.indices.includes(index));
         const isMerging = !!(currentEvent?.type === 'MERGE_STEP' && currentEvent.indices.includes(index));
 
         return (
           <MemoizedBar
-            key={`bar-${index}-${value}`} // Added value to key to force re-render if data changes significantly
+            key={`bar-${index}`} // Keep key stable to allow Reanimated transitions
             index={index}
             value={value}
             color={getElementColor(index)}
@@ -107,12 +114,53 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
             maxVal={maxVal}
             isFaded={isFaded}
             isMerging={isMerging}
+            label={getLabelForIndex(index)}
           />
         );
       })}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    height: 260,
+    paddingVertical: Spacing.two,
+  },
+  barWrapper: {
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  bar: {
+    marginHorizontal: 2,
+    borderRadius: 4,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: Spacing.one,
+  },
+  valueText: {
+    fontWeight: 'bold',
+    fontSize: 10,
+    marginBottom: 2,
+  },
+  pointerContainer: {
+    position: 'absolute',
+    top: -25,
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 4,
+    zIndex: 10,
+  },
+  pointerText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: 'bold',
+  }
+});
 
 const styles = StyleSheet.create({
   container: {
