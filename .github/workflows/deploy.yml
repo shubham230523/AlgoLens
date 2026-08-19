@@ -15,16 +15,22 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.x
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Check Node Version
-        run: node -v
+      - name: Verify Node version
+        run: |
+          node -v
+          npm -v
+          which node
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci || npm install
 
       - name: Build Web
-        run: npx expo export --platform web
+        run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
+          npx expo export --platform web
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
