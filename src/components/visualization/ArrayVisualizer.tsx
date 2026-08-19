@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
-import Animated, { useAnimatedStyle, withSpring, useReducedMotion } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withSpring, withTiming, useReducedMotion } from 'react-native-reanimated';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { VisualizationEvent } from '@/types/algorithm';
@@ -17,22 +17,29 @@ interface BarProps {
 const MemoizedBar = React.memo(({ value, index, color, width, maxVal }: BarProps) => {
   const shouldReduceMotion = useReducedMotion();
 
+  // Static fallback values
+  const staticHeight = value * (200 / maxVal) + 20;
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      backgroundColor: shouldReduceMotion ? color : withSpring(color),
-      height: shouldReduceMotion ? value * (200 / maxVal) + 20 : withSpring(value * (200 / maxVal) + 20),
+      backgroundColor: shouldReduceMotion ? color : withTiming(color, { duration: 300 }),
+      height: shouldReduceMotion ? staticHeight : withSpring(staticHeight),
     };
-  }, [color, value, maxVal, shouldReduceMotion]);
+  }, [color, value, maxVal, shouldReduceMotion, staticHeight]);
 
   return (
     <Animated.View
       style={[
         styles.bar,
-        { width },
+        {
+          width,
+          backgroundColor: color, // Fallback background
+          height: staticHeight, // Fallback height
+        },
         animatedStyle
       ]}
     >
-      {width > 25 && (
+      {width > 20 && (
         <ThemedText variant="caption" style={styles.valueText}>{value}</ThemedText>
       )}
     </Animated.View>

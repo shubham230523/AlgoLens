@@ -22,7 +22,7 @@ const MemoizedNode = React.memo(({ x, y, value, color, isHighlighted, textColor 
 
   const animatedCircleProps = useAnimatedProps(() => {
     return {
-      fill: shouldReduceMotion ? color : withSpring(color),
+      fill: shouldReduceMotion ? color : withTiming(color, { duration: 300 }),
       r: shouldReduceMotion ? (isHighlighted ? 22 : 20) : withSpring(isHighlighted ? 22 : 20),
     };
   }, [color, isHighlighted, shouldReduceMotion]);
@@ -32,6 +32,8 @@ const MemoizedNode = React.memo(({ x, y, value, color, isHighlighted, textColor 
       <AnimatedCircle
         cx={x}
         cy={y}
+        r={isHighlighted ? 22 : 20} // Fallback r
+        fill={color} // Fallback fill
         animatedProps={animatedCircleProps}
         stroke={isHighlighted ? color : 'transparent'}
         strokeWidth="2"

@@ -220,7 +220,7 @@ export default function VisualizerScreen() {
              </View>
           ) : (
             <>
-              <View style={styles.vizContainer}>
+              <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '44' }]}>
                 {showPrediction && nextEvent ? (
                   <PredictionOverlay
                     nextEvent={nextEvent}
@@ -253,7 +253,7 @@ export default function VisualizerScreen() {
               </View>
 
               {!showPrediction && (
-                <View style={styles.infoContainer}>
+                <View style={[styles.infoContainer, { backgroundColor: colors.backgroundElement + '22' }]}>
                   <ThemedText variant="h3">{currentEvent?.description || 'Press Play to Start'}</ThemedText>
 
                   {showCode && (
@@ -313,19 +313,22 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
   },
   vizContainer: {
-    minHeight: 350,
+    minHeight: 320,
     justifyContent: 'center',
+    marginBottom: Spacing.four,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   errorContainer: {
-    minHeight: 350,
+    minHeight: 320,
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.four,
   },
   infoContainer: {
-    padding: Spacing.three,
-    borderRadius: 8,
-    marginTop: Spacing.four,
+    padding: Spacing.four,
+    borderRadius: 16,
+    minHeight: 120,
   },
   variables: {
     marginTop: Spacing.two,
