@@ -75,7 +75,7 @@ export const binarySearch: AlgorithmDefinition = {
     steps.push({
       type: 'HIGHLIGHT',
       indices: [],
-      description: `Searching for \${target} in the array`,
+      description: `Searching for ${target} in the array`,
       codeLine: 1,
       variables: { target, low, high }
     });
@@ -86,7 +86,7 @@ export const binarySearch: AlgorithmDefinition = {
       steps.push({
         type: 'SUBARRAY_FOCUS',
         indices: Array.from({ length: high - low + 1 }, (_, i) => low + i),
-        description: \`Current search range: [\${low}, \${high}]\`,
+        description: `Current search range: [${low}, ${high}]`,
         codeLine: 3,
         variables: { low, high, mid }
       });
@@ -94,7 +94,7 @@ export const binarySearch: AlgorithmDefinition = {
       steps.push({
         type: 'COMPARE',
         indices: [mid],
-        description: \`Calculating mid: index \${mid} (value \${array[mid]})\`,
+        description: `Calculating mid: index ${mid} (value ${array[mid]})`,
         codeLine: 4,
         variables: { low, high, mid, target, current: array[mid] }
       });
@@ -103,7 +103,7 @@ export const binarySearch: AlgorithmDefinition = {
         steps.push({
           type: 'MARK_SORTED',
           indices: [mid],
-          description: \`Target \${target} found at index \${mid}!\`,
+          description: `Target ${target} found at index ${mid}!`,
           codeLine: 5,
           variables: { mid, target }
         });
@@ -114,7 +114,7 @@ export const binarySearch: AlgorithmDefinition = {
         steps.push({
           type: 'VISIT',
           indices: Array.from({ length: mid - low + 1 }, (_, i) => low + i),
-          description: \`\${array[mid]} < \${target}, focusing on the right half\`,
+          description: `${array[mid]} < ${target}, focusing on the right half`,
           codeLine: 6,
           variables: { low, high, mid, target }
         });
@@ -123,7 +123,7 @@ export const binarySearch: AlgorithmDefinition = {
         steps.push({
           type: 'VISIT',
           indices: Array.from({ length: high - mid + 1 }, (_, i) => mid + i),
-          description: \`\${array[mid]} > \${target}, focusing on the left half\`,
+          description: `${array[mid]} > ${target}, focusing on the left half`,
           codeLine: 7,
           variables: { low, high, mid, target }
         });
@@ -134,7 +134,7 @@ export const binarySearch: AlgorithmDefinition = {
     steps.push({
       type: 'HIGHLIGHT',
       indices: [],
-      description: \`Target \${target} not found in the array\`,
+      description: `Target ${target} not found in the array`,
       codeLine: 9,
       variables: { target }
     });

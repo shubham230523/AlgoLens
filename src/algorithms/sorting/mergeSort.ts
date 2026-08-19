@@ -132,7 +132,7 @@ fun merge(arr: IntArray, l: Int, m: Int, r: Int) {
         steps.push({
           type: 'HIGHLIGHT',
           indices: [l],
-          description: \`Base case reached: index \${l} is a single element.\`,
+          description: `Base case reached: index ${l} is a single element.`,
           codeLine: 2,
           variables: { l, r, depth }
         });
@@ -144,7 +144,7 @@ fun merge(arr: IntArray, l: Int, m: Int, r: Int) {
       steps.push({
         type: 'SUBARRAY_FOCUS',
         indices: Array.from({ length: r - l + 1 }, (_, i) => l + i),
-        description: \`Dividing subarray [\${l}...\${r}] at mid index \${mid}\`,
+        description: `Dividing subarray [${l}...${r}] at mid index ${mid}`,
         codeLine: 3,
         variables: { l, r, m: mid, depth }
       });
@@ -161,7 +161,7 @@ fun merge(arr: IntArray, l: Int, m: Int, r: Int) {
       steps.push({
         type: 'SUBARRAY_FOCUS',
         indices: Array.from({ length: r - l + 1 }, (_, i) => l + i),
-        description: \`Merging subarrays [\${l}...\${mid}] and [\${mid + 1}...\${r}]\`,
+        description: `Merging subarrays [${l}...${mid}] and [${mid + 1}...${r}]`,
         codeLine: 6,
         variables: { l, r, m: mid, depth }
       });
@@ -172,7 +172,7 @@ fun merge(arr: IntArray, l: Int, m: Int, r: Int) {
         steps.push({
           type: 'COMPARE',
           indices: [l + i, mid + 1 + j],
-          description: \`Compare \${leftArr[i]} and \${rightArr[j]}\`,
+          description: `Compare ${leftArr[i]} and ${rightArr[j]}`,
           codeLine: 18,
           variables: { i, j, k, leftVal: leftArr[i], rightVal: rightArr[j] }
         });
@@ -182,7 +182,7 @@ fun merge(arr: IntArray, l: Int, m: Int, r: Int) {
           steps.push({
             type: 'MERGE_STEP',
             indices: [k],
-            description: \`Place \${leftArr[i]} from left sublist into index \${k}\`,
+            description: `Place ${leftArr[i]} from left sublist into index ${k}`,
             codeLine: 18,
             variables: { i, j, k, array: [...arr] }
           });
@@ -192,7 +192,7 @@ fun merge(arr: IntArray, l: Int, m: Int, r: Int) {
           steps.push({
             type: 'MERGE_STEP',
             indices: [k],
-            description: \`Place \${rightArr[j]} from right sublist into index \${k}\`,
+            description: `Place ${rightArr[j]} from right sublist into index ${k}`,
             codeLine: 19,
             variables: { i, j, k, array: [...arr] }
           });
@@ -206,7 +206,7 @@ fun merge(arr: IntArray, l: Int, m: Int, r: Int) {
         steps.push({
           type: 'MERGE_STEP',
           indices: [k],
-          description: \`Copy remaining element \${leftArr[i]} from left sublist\`,
+          description: `Copy remaining element ${leftArr[i]} from left sublist`,
           codeLine: 21,
           variables: { i, k, array: [...arr] }
         });
@@ -219,7 +219,7 @@ fun merge(arr: IntArray, l: Int, m: Int, r: Int) {
         steps.push({
           type: 'MERGE_STEP',
           indices: [k],
-          description: \`Copy remaining element \${rightArr[j]} from right sublist\`,
+          description: `Copy remaining element ${rightArr[j]} from right sublist`,
           codeLine: 22,
           variables: { j, k, array: [...arr] }
         });
@@ -230,7 +230,7 @@ fun merge(arr: IntArray, l: Int, m: Int, r: Int) {
       steps.push({
         type: 'MARK_SORTED',
         indices: Array.from({ length: r - l + 1 }, (_, i) => l + i),
-        description: \`Subarray [\${l}...\${r}] successfully merged and sorted!\`,
+        description: `Subarray [${l}...${r}] successfully merged and sorted!`,
         codeLine: 6,
         variables: { l, r, array: [...arr] }
       });
@@ -241,7 +241,7 @@ fun merge(arr: IntArray, l: Int, m: Int, r: Int) {
     steps.push({
       type: 'MARK_SORTED',
       indices: Array.from({ length: arr.length }, (_, i) => i),
-      description: \`Algorithm complete! The array is fully sorted.\`,
+      description: `Algorithm complete! The array is fully sorted.`,
       codeLine: 1,
       variables: { array: [...arr] }
     });
