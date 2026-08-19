@@ -2,6 +2,10 @@
 
 **AlgoLens** is a high-performance, production-ready educational platform designed to make algorithms come alive. Built with React Native, Expo, and Reanimated, it provides a seamless learning experience across Web, iOS, and Android.
 
+> [!IMPORTANT]
+> **Status: Under Active Development** 🛠️
+> This project is currently in development mode. Some features are being refined, and we are constantly adding new algorithms and visual enhancements.
+
 ## ✨ Core Pillars
 
 ### 1. 🧠 Intelligent AI Tutor & Code Sync
