@@ -12,9 +12,11 @@ interface BarProps {
   color: string;
   width: number;
   maxVal: number;
+  isFaded: boolean;
+  isMerging: boolean;
 }
 
-const MemoizedBar = React.memo(({ value, index, color, width, maxVal }: BarProps) => {
+const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, isMerging }: BarProps) => {
   const shouldReduceMotion = useReducedMotion();
 
   // Static fallback values
@@ -24,8 +26,12 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal }: BarProps
     return {
       backgroundColor: shouldReduceMotion ? color : withTiming(color, { duration: 300 }),
       height: shouldReduceMotion ? staticHeight : withSpring(staticHeight, { damping: 15 }),
+      opacity: withTiming(isFaded ? 0.3 : 1, { duration: 300 }),
+      transform: [
+        { translateY: withSpring(isMerging ? -40 : 0) }
+      ]
     };
-  }, [color, value, maxVal, shouldReduceMotion, staticHeight]);
+  }, [color, value, maxVal, shouldReduceMotion, staticHeight, isFaded, isMerging]);
 
   return (
     <Animated.View
@@ -34,6 +40,7 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal }: BarProps
         {
           width,
           backgroundColor: color,
+          height: staticHeight, // Hard-wired base height
         },
         animatedStyle
       ]}
@@ -66,7 +73,7 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
     if (sortedIndices.has(index)) return colors.sorted;
     if (currentEvent?.indices.includes(index)) {
       if (currentEvent.type === 'COMPARE') return colors.compare;
-      if (currentEvent.type === 'SWAP') return colors.swap;
+      if (currentEvent.type === 'SWAP' || currentEvent.type === 'MERGE_STEP') return colors.swap;
       return colors.active;
     }
     return colors.backgroundElement;
@@ -84,16 +91,23 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
       accessibilityRole="image"
       accessibilityLabel={accessibilityLabel}
     >
-      {data.map((value, index) => (
-        <MemoizedBar
-          key={`bar-${index}`}
-          index={index}
-          value={value}
-          color={getElementColor(index)}
-          width={barWidth}
-          maxVal={maxVal}
-        />
-      ))}
+      {data.map((value, index) => {
+        const isFaded = !!(currentEvent?.type === 'SUBARRAY_FOCUS' && !currentEvent.indices.includes(index));
+        const isMerging = !!(currentEvent?.type === 'MERGE_STEP' && currentEvent.indices.includes(index));
+
+        return (
+          <MemoizedBar
+            key={`bar-${index}`}
+            index={index}
+            value={value}
+            color={getElementColor(index)}
+            width={barWidth}
+            maxVal={maxVal}
+            isFaded={isFaded}
+            isMerging={isMerging}
+          />
+        );
+      })}
     </View>
   );
 }

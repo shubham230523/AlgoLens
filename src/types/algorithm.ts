@@ -9,7 +9,9 @@ export type VisualizationEventType =
   | 'DESELECT'
   | 'MARK_SORTED'
   | 'MOVE_POINTER'
-  | 'UPDATE_VALUE';
+  | 'UPDATE_VALUE'
+  | 'SUBARRAY_FOCUS'
+  | 'MERGE_STEP';
 
 export interface VisualizationEvent {
   type: VisualizationEventType;

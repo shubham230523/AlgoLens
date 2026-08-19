@@ -1,44 +1,43 @@
-# UI and Routing Fixes Implementation Plan
+# Merge Sort & Enhanced Animation Implementation Plan
 
-This plan addresses several UI glitches and a routing issue reported by the user.
+This plan aims to implement the **Merge Sort** algorithm and upgrade the visualization engine to support complex divide-and-conquer animations, inspired by the high-quality HackerEarth visualizer.
 
 ## Goal
-Fix header overlapping, text cropping in learning paths, missing horizontal padding for cards, and non-functional card clicks.
+Add Merge Sort with accurate step generation and enhance the `ArrayVisualizer` to support subarray highlighting and vertical offsets for "merging" effects.
 
 ## Proposed Changes
 
-### Navigation & Header
+### 1. Type Extensions
 
-#### [app-tabs.web.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/app-tabs.web.tsx)
-- **Fix Overlap**: Change `tabListContainer` from `position: 'absolute'` to `position: 'relative'` (or ensure it doesn't float over content if absolute is desired for a specific look).
-- **Better Brand Text**: Update "Expo Starter" to "AlgoLens".
+#### [algorithm.ts](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/types/algorithm.ts)
+- Add `SUBARRAY_FOCUS` to `VisualizationEventType` to represent the "Divide" phase.
+- Add `MERGE_STEP` to represent the "Combine" phase.
 
-#### [_layout.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/app/_layout.tsx)
-- Ensure the main content area has a `paddingTop` if the header is absolute.
+### 2. New Algorithm Implementation
 
-### UI Components
+#### [NEW] [mergeSort.ts](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/algorithms/sorting/mergeSort.ts)
+- Implement recursive `mergeSort` with a `generateSteps` wrapper.
+- Ensure steps include recursive depth and subarray bounds to guide the visualizer.
 
-#### [LearningPathCard.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ui/LearningPathCard.tsx)
-- **Fix Text Cropping**: Remove fixed `height: 32` from `styles.description` and use `minHeight` or let it flex naturally with `numberOfLines`.
+#### [index.ts](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/algorithms/index.ts)
+- Register `mergeSort` in the library.
 
-#### [AlgorithmCard.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ui/AlgorithmCard.tsx)
-- **Fix Padding**: Add `paddingHorizontal: Spacing.four` (or similar) to ensure cards have breathing room on the sides.
+### 3. Visualization Engine Upgrades
 
-#### [Card.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/ui/Card.tsx)
-- **Fix Routing**: Ensure `onPress` is correctly handled. Verify if `TouchableOpacity` needs `onPress` passed directly.
-
-### Screen Layouts
-
-#### [HomeScreen.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/app/index.tsx)
-- **Fix Padding**: Wrap non-horizontal sections in a View with horizontal padding.
-- **Ensure Clickability**: Double check `onPress` handlers for `LearningPathCard` and `AlgorithmCard`.
+#### [ArrayVisualizer.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/visualization/ArrayVisualizer.tsx)
+- **Subarray Highlighting**: Dim elements that are NOT part of the current active subarray.
+- **Vertical Offsets**: Use `useAnimatedStyle` to shift merging elements vertically to create a "temporary array" effect during the combining phase.
+- **Improved Labels**: Show range labels (e.g., `left`, `mid`, `right`) during merge steps.
 
 ---
 
 ## Verification Plan
 
+### Automated Tests
+- `npm run lint`: Check for code style.
+- Unit test for `mergeSort.generateSteps` to ensure the final state is always sorted.
+
 ### Manual Verification
-- **Header Check**: Open the Web version and verify the header no longer crops the AlgoLens logo.
-- **Text Check**: Verify "Sorting Master" description is fully visible.
-- **Padding Check**: Ensure "Bubble Sort" card has consistent left/right margins.
-- **Routing Check**: Click on "Bubble Sort" and a Learning Path to ensure they navigate to the correct screens.
+- **Merge Sort Walkthrough**: Step through Merge Sort and verify that the "Divide" phase correctly highlights smaller segments.
+- **Merging Check**: Verify that elements appear to "move" or transform clearly when being combined back into the sorted array.
+- **Performance**: Ensure the new vertical animations don't cause lag on larger arrays.

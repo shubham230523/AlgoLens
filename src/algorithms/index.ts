@@ -2,6 +2,7 @@ import { AlgorithmDefinition } from '@/types/algorithm';
 import { bubbleSort } from './sorting/bubbleSort';
 import { selectionSort } from './sorting/selectionSort';
 import { insertionSort } from './sorting/insertionSort';
+import { mergeSort } from './sorting/mergeSort';
 import { linearSearch } from './searching/linearSearch';
 import { binarySearch } from './searching/binarySearch';
 import { bstSearch } from './trees/bstSearch';
@@ -14,6 +15,7 @@ export const ALL_ALGORITHMS: AlgorithmDefinition[] = [
   bubbleSort,
   selectionSort,
   insertionSort,
+  mergeSort,
   linearSearch,
   binarySearch,
   bstSearch,

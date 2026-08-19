@@ -64,21 +64,28 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingVertical: Spacing.four,
-    paddingHorizontal: Spacing.six,
-    maxWidth: 400,
-    alignSelf: 'center',
+    gap: Spacing.four, // Use uniform gaps instead of space-between
     width: '100%',
   },
   button: {
     padding: Spacing.two,
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   playButton: {
-    width: 56,
-    height: 64, // Keep it slightly taller for the "pill" look if desired or make it a circle
+    width: 64,
+    height: 64,
     borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
 });
