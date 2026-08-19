@@ -20,7 +20,7 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, i
   const shouldReduceMotion = useReducedMotion();
 
   // Static fallback values
-  const staticHeight = value * (200 / maxVal) + 20;
+  const staticHeight = value * (180 / maxVal) + 30; // Slightly taller base height
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -28,10 +28,10 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, i
       height: shouldReduceMotion ? staticHeight : withSpring(staticHeight, { damping: 15 }),
       opacity: withTiming(isFaded ? 0.3 : 1, { duration: 300 }),
       transform: [
-        { translateY: withSpring(isMerging ? -40 : 0) }
+        { translateY: withSpring(isMerging ? -30 : 0) }
       ]
     };
-  }, [color, value, maxVal, shouldReduceMotion, staticHeight, isFaded, isMerging]);
+  });
 
   return (
     <Animated.View
@@ -39,8 +39,8 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, i
         styles.bar,
         {
           width,
-          backgroundColor: color,
-          height: staticHeight, // Hard-wired base height
+          backgroundColor: color, // Fallback background
+          height: staticHeight, // Fallback height
         },
         animatedStyle
       ]}
@@ -63,11 +63,13 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
   const colors = Colors[scheme];
   const { width: windowWidth } = useWindowDimensions();
 
-  const maxVal = useMemo(() => Math.max(...data, 1), [data]);
+  // Safeguard: Ensure data is an array
+  const safeData = Array.isArray(data) ? data : [];
+  const maxVal = useMemo(() => safeData.length > 0 ? Math.max(...safeData, 1) : 1, [safeData]);
 
   // Dynamic scaling logic
   const availableWidth = windowWidth - Spacing.eight;
-  const barWidth = Math.max(8, Math.min(40, (availableWidth / data.length) - Spacing.one));
+  const barWidth = safeData.length > 0 ? Math.max(10, Math.min(45, (availableWidth / safeData.length) - 4)) : 40;
 
   const getElementColor = (index: number) => {
     if (sortedIndices.has(index)) return colors.sorted;
@@ -76,14 +78,14 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
       if (currentEvent.type === 'SWAP' || currentEvent.type === 'MERGE_STEP') return colors.swap;
       return colors.active;
     }
-    return colors.backgroundElement;
+    return scheme === 'dark' ? '#2A334D' : '#E0E0E6'; // More distinct default color
   };
 
   const accessibilityLabel = useMemo(() => {
-    const values = data.join(', ');
+    const values = safeData.join(', ');
     const eventDesc = currentEvent ? `. Current step: ${currentEvent.description}` : '';
-    return `Algorithm visualization array with ${data.length} elements: ${values}${eventDesc}`;
-  }, [data, currentEvent]);
+    return `Algorithm visualization array with ${safeData.length} elements: ${values}${eventDesc}`;
+  }, [safeData, currentEvent]);
 
   return (
     <View
@@ -91,13 +93,13 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
       accessibilityRole="image"
       accessibilityLabel={accessibilityLabel}
     >
-      {data.map((value, index) => {
+      {safeData.map((value, index) => {
         const isFaded = !!(currentEvent?.type === 'SUBARRAY_FOCUS' && !currentEvent.indices.includes(index));
         const isMerging = !!(currentEvent?.type === 'MERGE_STEP' && currentEvent.indices.includes(index));
 
         return (
           <MemoizedBar
-            key={`bar-${index}`}
+            key={`bar-${index}-${value}`} // Added value to key to force re-render if data changes significantly
             index={index}
             value={value}
             color={getElementColor(index)}

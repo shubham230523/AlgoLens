@@ -60,7 +60,11 @@ export default function VisualizerScreen() {
   const [sortedIndices, setSortedIndices] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
-  const prevStepIndexRef = useRef<number>(-1);
+  // Sync state when initialData changes
+  useEffect(() => {
+    setCurrentData(initialData);
+    setSortedIndices(new Set());
+  }, [initialData]);
 
   // Initialize steps & track view
   useEffect(() => {
@@ -76,45 +80,24 @@ export default function VisualizerScreen() {
     }
   }, [algorithm, inputData]);
 
-  // Handle step changes with optimization
+  // Handle step changes
   useEffect(() => {
     try {
-      const prevIndex = prevStepIndexRef.current;
-
-      // Full reset
       if (currentStepIndex === -1) {
         setCurrentData(initialData);
         setSortedIndices(new Set());
-        prevStepIndexRef.current = -1;
         return;
       }
 
-      if (algorithm.visualizationType === 'GRAPH') {
-          setCurrentData(inputData);
-      } else {
-          let newData: any;
-          let newSorted: Set<number>;
+      const newData = Array.isArray(initialData) ? [...initialData] : (typeof initialData === 'object' ? {...initialData} : initialData);
+      const newSorted = new Set<number>();
 
-          // Optimization: If only one step forward, apply delta to current state
-          if (currentStepIndex === prevIndex + 1 && prevIndex >= -1) {
-              newData = Array.isArray(currentData) ? [...currentData] : currentData;
-              newSorted = new Set(sortedIndices);
-              const step = steps[currentStepIndex];
-              applyStep(step, newData, newSorted);
-          } else {
-              // Re-calculate from scratch
-              newData = Array.isArray(initialData) ? [...initialData] : initialData;
-              newSorted = new Set<number>();
-              for (let i = 0; i <= currentStepIndex; i++) {
-                applyStep(steps[i], newData, newSorted);
-              }
-          }
-
-          setCurrentData(newData);
-          setSortedIndices(newSorted);
+      for (let i = 0; i <= currentStepIndex; i++) {
+        applyStep(steps[i], newData, newSorted);
       }
 
-      prevStepIndexRef.current = currentStepIndex;
+      setCurrentData(newData);
+      setSortedIndices(newSorted);
 
       // Track completion
       if (currentStepIndex === steps.length - 1 && steps.length > 0) {
@@ -132,25 +115,31 @@ export default function VisualizerScreen() {
         setShowPrediction(true);
       }
     }
-  }, [currentStepIndex, steps, initialData, isPredictionMode, inputData, algorithm.visualizationType]);
+  }, [currentStepIndex, steps, initialData, isPredictionMode]);
 
   const applyStep = (step: any, data: any, sorted: Set<number>) => {
     if (!step) return;
+
+    // Handle array state updates (Merge Sort, etc.)
+    if (step.variables?.array && Array.isArray(data)) {
+        step.variables.array.forEach((val: number, idx: number) => {
+          if (idx >= 0 && idx < data.length) {
+            data[idx] = val;
+          }
+        });
+    }
+
     if (step.type === 'SWAP' && Array.isArray(data)) {
         const [idx1, idx2] = step.indices;
         if (step.indices.length === 2) {
-          [data[idx1], data[idx2]] = [data[idx2], data[idx1]];
-        } else if (step.indices.length === 1 && step.variables?.array) {
-          step.variables.array.forEach((val: number, idx: number) => {
-            data[idx] = val;
-          });
+          if (idx1 < data.length && idx2 < data.length) {
+            [data[idx1], data[idx2]] = [data[idx2], data[idx1]];
+          }
         }
-    } else if (step.type === 'UPDATE_VALUE' && step.variables?.array && Array.isArray(data)) {
-        step.variables.array.forEach((val: number, idx: number) => {
-          data[idx] = val;
-        });
     } else if (step.type === 'MARK_SORTED') {
-        step.indices.forEach((idx: number) => sorted.add(idx));
+        step.indices.forEach((idx: number) => {
+          if (idx >= 0) sorted.add(idx);
+        });
     }
   };
 
