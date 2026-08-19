@@ -17,6 +17,7 @@ import { CodeViewer } from '@/components/visualization/CodeViewer';
 import { AITutorModal } from '@/components/visualization/AITutorModal';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Settings2, Brain, Heart, Code, Sparkles } from 'lucide-react-native';
+import { SupportedLanguage } from '@/types/algorithm';
 
 export default function VisualizerScreen() {
   const { id } = useLocalSearchParams();
@@ -44,7 +45,7 @@ export default function VisualizerScreen() {
   const [isInputModalVisible, setIsInputModalVisible] = useState(false);
   const [isPredictionMode, setIsPredictionMode] = useState(false);
   const [showPrediction, setShowPrediction] = useState(false);
-  const [showCode, setShowCode] = useState(true);
+  const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>('cpp');
   const [isAITutorVisible, setIsAITutorVisible] = useState(false);
 
   const initialData = useMemo(() => {
@@ -184,14 +185,6 @@ export default function VisualizerScreen() {
               >
                 <Sparkles color={colors.primary} size={18} />
               </TouchableOpacity>
-              {!isDesktop && (
-                <TouchableOpacity
-                  onPress={() => setShowCode(!showCode)}
-                  style={styles.settingsBtn}
-                >
-                  <Code color={showCode ? colors.primary : colors.textSecondary} size={18} />
-                </TouchableOpacity>
-              )}
               <TouchableOpacity
                 onPress={() => setIsPredictionMode(!isPredictionMode)}
                 style={[styles.settingsBtn, isPredictionMode && { opacity: 1 }]}
@@ -208,63 +201,64 @@ export default function VisualizerScreen() {
 
       <ErrorBoundary>
         <View style={[styles.mainLayout, isDesktop && styles.desktopLayout]}>
-          {/* Code Section */}
-          {(showCode || isDesktop) && (
-            <View style={[styles.codeSection, isDesktop && styles.desktopCodeSection]}>
-              <View style={styles.sectionHeader}>
-                 <ThemedText variant="subtitle">Algorithm Implementation</ThemedText>
-              </View>
-              <CodeViewer
-                code={algorithm.code}
-                activeLine={currentEvent?.codeLine}
-                isDesktop={isDesktop}
-              />
-              {currentEvent?.variables && (
-                <View style={styles.variablesPanel}>
-                  <ThemedText variant="caption" style={{ fontWeight: 'bold', marginBottom: 6 }}>State</ThemedText>
-                  <View style={styles.variablesGrid}>
-                    {Object.entries(currentEvent.variables).map(([key, val]) => {
-                      if (key === 'array') return null;
-                      return (
-                        <View key={key} style={[styles.variableBadge, { backgroundColor: colors.backgroundElement }]}>
-                          <ThemedText variant="caption" style={{ color: colors.primary, fontWeight: 'bold' }}>{key}:</ThemedText>
-                          <ThemedText variant="caption">{JSON.stringify(val)}</ThemedText>
-                        </View>
-                      );
-                    })}
+          {/* Code Section - Full Left (40%) */}
+          <View style={[styles.codeSection, isDesktop && styles.desktopCodeSection]}>
+            <CodeViewer
+              code={algorithm.code}
+              activeLine={currentEvent?.codeLine}
+              isDesktop={isDesktop}
+              selectedLanguage={selectedLanguage}
+              onLanguageChange={setSelectedLanguage}
+            />
+          </View>
+
+          {/* Right Section (60%) */}
+          <View style={[styles.rightSection, isDesktop && styles.desktopRightSection]}>
+             {/* Animation Canvas - Top 2/3 */}
+             <View style={styles.vizCanvas}>
+                <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '11' }]}>
+                  {showPrediction && nextEvent ? (
+                    <PredictionOverlay
+                      nextEvent={nextEvent}
+                      onCorrect={() => { setShowPrediction(false); nextStep(); }}
+                      onIncorrect={() => { setShowPrediction(false); nextStep(); }}
+                    />
+                  ) : renderVisualizer()}
+                </View>
+             </View>
+
+             {/* Bottom 1/3: Variables, Description, Controls */}
+             <View style={styles.bottomSection}>
+                <View style={styles.metadataPanel}>
+                  {currentEvent?.variables && (
+                    <View style={styles.variablesPanel}>
+                      <View style={styles.variablesGrid}>
+                        {Object.entries(currentEvent.variables).map(([key, val]) => {
+                          if (key === 'array') return null;
+                          return (
+                            <View key={key} style={[styles.variableBadge, { backgroundColor: colors.backgroundElement }]}>
+                              <ThemedText variant="caption" style={{ color: colors.primary, fontWeight: 'bold' }}>{key}:</ThemedText>
+                              <ThemedText variant="caption">{JSON.stringify(val)}</ThemedText>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  )}
+                  <View style={styles.descriptionRow}>
+                    <ThemedText variant="h3" style={styles.stepDescription} numberOfLines={2}>
+                      {currentEvent?.description || 'Press Play to begin'}
+                    </ThemedText>
                   </View>
                 </View>
-              )}
-            </View>
-          )}
 
-          {/* Visualization Section */}
-          <View style={[styles.vizSection, isDesktop && styles.desktopVizSection]}>
-             <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '11' }]}>
-                {showPrediction && nextEvent ? (
-                  <PredictionOverlay
-                    nextEvent={nextEvent}
-                    onCorrect={() => { setShowPrediction(false); nextStep(); }}
-                    onIncorrect={() => { setShowPrediction(false); nextStep(); }}
-                  />
-                ) : renderVisualizer()}
-              </View>
-
-              <View style={styles.descriptionPanel}>
-                <View style={[styles.stepIndicator, { backgroundColor: colors.primary }]}>
-                  <ThemedText style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>STEP {currentStepIndex + 1}</ThemedText>
+                <View style={styles.controlsSection}>
+                  <PlaybackControls />
                 </View>
-                <ThemedText variant="h3" style={styles.stepDescription} numberOfLines={3}>
-                  {currentEvent?.description || 'Press Play to begin'}
-                </ThemedText>
-              </View>
+             </View>
           </View>
         </View>
       </ErrorBoundary>
-
-      <View style={[styles.controlsOuter, { borderTopColor: colors.backgroundElement }]}>
-        <PlaybackControls />
-      </View>
 
       <CustomInputModal
         isVisible={isInputModalVisible}
@@ -279,7 +273,7 @@ export default function VisualizerScreen() {
         onClose={() => setIsAITutorVisible(false)}
         currentEvent={currentEvent}
         algorithmName={algorithm.name}
-        code={algorithm.code}
+        code={algorithm.code[selectedLanguage]}
       />
     </View>
   );
@@ -291,67 +285,57 @@ const styles = StyleSheet.create({
   },
   mainLayout: {
     flex: 1,
-    paddingBottom: 10, // Ensure space before controls
   },
   desktopLayout: {
     flexDirection: 'row',
   },
   codeSection: {
-    flex: 0.38,
-    padding: Spacing.four,
-    borderRightWidth: 1,
-    borderRightColor: '#eeeeee22',
+    flex: 1,
+    padding: Spacing.two,
+    backgroundColor: '#1e1f20',
   },
   desktopCodeSection: {
-    maxWidth: 450,
+    flex: 0.4,
+    height: '100%',
   },
-  vizSection: {
-    flex: 0.62,
+  rightSection: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  desktopRightSection: {
+    flex: 0.6,
+    height: '100%',
+  },
+  vizCanvas: {
+    flex: 2, // Top 2/3
     padding: Spacing.four,
-    paddingBottom: 20, // Add padding at bottom
-  },
-  desktopVizSection: {
-    paddingHorizontal: Spacing.six,
-  },
-  sectionHeader: {
-    marginBottom: Spacing.two,
-    paddingBottom: Spacing.two,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eeeeee22',
   },
   vizContainer: {
-    height: 350,
+    flex: 1,
     justifyContent: 'center',
     borderRadius: 24,
     overflow: 'hidden',
-    marginBottom: Spacing.four,
   },
-  descriptionPanel: {
+  bottomSection: {
+    flex: 1, // Bottom 1/3
     padding: Spacing.four,
-    backgroundColor: '#3b82f608',
-    borderRadius: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#3b82f6',
-    minHeight: 110,
-    justifyContent: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#eeeeee22',
   },
-  stepIndicator: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 8,
+  metadataPanel: {
+    flex: 1,
+    justifyContent: 'flex-start',
+  },
+  descriptionRow: {
+    marginTop: Spacing.two,
   },
   stepDescription: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '500',
-    lineHeight: 28,
+    lineHeight: 30,
   },
   variablesPanel: {
-    marginTop: Spacing.four,
-    padding: Spacing.three,
-    borderRadius: 12,
-    backgroundColor: '#00000008',
+    marginBottom: Spacing.two,
   },
   variablesGrid: {
     flexDirection: 'row',
@@ -361,14 +345,13 @@ const styles = StyleSheet.create({
   variableBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
     gap: 6,
   },
-  controlsOuter: {
-    borderTopWidth: 1,
-    paddingTop: Spacing.two,
+  controlsSection: {
+    marginTop: 'auto',
   },
   settingsBtn: {
     marginLeft: Spacing.three,

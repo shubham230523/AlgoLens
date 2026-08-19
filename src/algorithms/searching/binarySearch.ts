@@ -12,64 +12,99 @@ export const binarySearch: AlgorithmDefinition = {
   },
   visualizationType: 'BAR',
   defaultInput: { array: [10, 20, 30, 40, 50, 60, 70, 80, 90], target: 70 },
-  code: `function binarySearch(arr, target) {
-  let left = 0;
-  let right = arr.length - 1;
-
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
-
-    if (arr[mid] === target) {
-      return mid;
+  code: {
+    cpp: `int binarySearch(int arr[], int n, int target) {
+    int low = 0, high = n - 1;
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        if (arr[mid] == target) return mid;
+        if (arr[mid] < target) low = mid + 1;
+        else high = mid - 1;
     }
-    if (arr[mid] < target) {
-      left = mid + 1;
-    } else {
-      right = mid - 1;
+    return -1;
+}`,
+    java: `public int binarySearch(int[] arr, int target) {
+    int low = 0, high = arr.length - 1;
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        if (arr[mid] == target) return mid;
+        if (arr[mid] < target) low = mid + 1;
+        else high = mid - 1;
     }
+    return -1;
+}`,
+    python: `def binary_search(arr, target):
+    low, high = 0, len(arr) - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if arr[mid] == target:
+            return mid
+        if arr[mid] < target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1`,
+    javascript: `function binarySearch(arr, target) {
+  let low = 0, high = arr.length - 1;
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (arr[mid] === target) return mid;
+    if (arr[mid] < target) low = mid + 1;
+    else high = mid - 1;
   }
   return -1;
 }`,
+    kotlin: `fun binarySearch(arr: IntArray, target: Int): Int {
+    var low = 0; var high = arr.size - 1
+    while (low <= high) {
+        val mid = low + (high - low) / 2
+        if (arr[mid] == target) return mid
+        if (arr[mid] < target) low = mid + 1
+        else high = mid - 1
+    }
+    return -1
+}`
+  },
   generateSteps: (input: { array: number[], target: number }): VisualizationEvent[] => {
     const steps: VisualizationEvent[] = [];
     const { array, target } = input;
 
-    let left = 0;
-    let right = array.length - 1;
+    let low = 0;
+    let high = array.length - 1;
 
     steps.push({
       type: 'HIGHLIGHT',
       indices: [],
-      description: `Searching for ${target} in the array`,
+      description: `Searching for \${target} in the array`,
       codeLine: 1,
-      variables: { target, left, right }
+      variables: { target, low, high }
     });
 
-    while (left <= right) {
-      const mid = Math.floor((left + right) / 2);
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
 
       steps.push({
         type: 'SUBARRAY_FOCUS',
-        indices: Array.from({ length: right - left + 1 }, (_, i) => left + i),
-        description: `Current search range: [${left}, ${right}]`,
-        codeLine: 4,
-        variables: { left, right, mid }
+        indices: Array.from({ length: high - low + 1 }, (_, i) => low + i),
+        description: \`Current search range: [\${low}, \${high}]\`,
+        codeLine: 3,
+        variables: { low, high, mid }
       });
 
       steps.push({
         type: 'COMPARE',
         indices: [mid],
-        description: `Calculating mid: index ${mid} (value ${array[mid]})`,
-        codeLine: 5,
-        variables: { left, right, mid, target, current: array[mid] }
+        description: \`Calculating mid: index \${mid} (value \${array[mid]})\`,
+        codeLine: 4,
+        variables: { low, high, mid, target, current: array[mid] }
       });
 
       if (array[mid] === target) {
         steps.push({
           type: 'MARK_SORTED',
           indices: [mid],
-          description: `Target ${target} found at index ${mid}!`,
-          codeLine: 6,
+          description: \`Target \${target} found at index \${mid}!\`,
+          codeLine: 5,
           variables: { mid, target }
         });
         return steps;
@@ -78,29 +113,29 @@ export const binarySearch: AlgorithmDefinition = {
       if (array[mid] < target) {
         steps.push({
           type: 'VISIT',
-          indices: Array.from({ length: mid - left + 1 }, (_, i) => left + i),
-          description: `${array[mid]} < ${target}, focusing on the right half`,
-          codeLine: 7,
-          variables: { left, right, mid, target }
+          indices: Array.from({ length: mid - low + 1 }, (_, i) => low + i),
+          description: \`\${array[mid]} < \${target}, focusing on the right half\`,
+          codeLine: 6,
+          variables: { low, high, mid, target }
         });
-        left = mid + 1;
+        low = mid + 1;
       } else {
         steps.push({
           type: 'VISIT',
-          indices: Array.from({ length: right - mid + 1 }, (_, i) => mid + i),
-          description: `${array[mid]} > ${target}, focusing on the left half`,
-          codeLine: 8,
-          variables: { left, right, mid, target }
+          indices: Array.from({ length: high - mid + 1 }, (_, i) => mid + i),
+          description: \`\${array[mid]} > \${target}, focusing on the left half\`,
+          codeLine: 7,
+          variables: { low, high, mid, target }
         });
-        right = mid - 1;
+        high = mid - 1;
       }
     }
 
     steps.push({
       type: 'HIGHLIGHT',
       indices: [],
-      description: `Target ${target} not found in the array`,
-      codeLine: 10,
+      description: \`Target \${target} not found in the array\`,
+      codeLine: 9,
       variables: { target }
     });
 

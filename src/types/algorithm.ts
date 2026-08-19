@@ -33,9 +33,11 @@ export interface AlgorithmMetadata {
   };
 }
 
+export type SupportedLanguage = 'cpp' | 'java' | 'python' | 'javascript' | 'kotlin';
+
 export interface AlgorithmDefinition extends AlgorithmMetadata {
   generateSteps: (input: any) => VisualizationEvent[];
   defaultInput: any;
   visualizationType: 'ARRAY' | 'BAR' | 'LINKED_LIST' | 'TREE' | 'GRAPH' | 'RECURSION';
-  code: string;
+  code: Record<SupportedLanguage, string>;
 }
