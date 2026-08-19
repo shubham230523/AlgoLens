@@ -40,14 +40,23 @@ function merge(arr, left, mid, right) {
     const arr = [...input];
 
     const sort = (l: number, r: number, depth: number) => {
-      if (l >= r) return;
+      if (l >= r) {
+        steps.push({
+          type: 'HIGHLIGHT',
+          indices: [l],
+          description: `Base case reached: index ${l} is a single element.`,
+          codeLine: 2,
+          variables: { left: l, right: r, depth }
+        });
+        return;
+      }
 
       const mid = Math.floor((l + r) / 2);
 
       steps.push({
         type: 'SUBARRAY_FOCUS',
         indices: Array.from({ length: r - l + 1 }, (_, i) => l + i),
-        description: `Dividing subarray [${l}...${r}]`,
+        description: `Dividing subarray [${l}...${r}] at mid index ${mid}`,
         codeLine: 4,
         variables: { left: l, right: r, mid, depth }
       });
@@ -85,7 +94,7 @@ function merge(arr, left, mid, right) {
           steps.push({
             type: 'MERGE_STEP',
             indices: [k],
-            description: `Place ${leftArr[i]} from left sublist`,
+            description: `Place ${leftArr[i]} from left sublist into index ${k}`,
             codeLine: 18,
             variables: { i, j, k, array: [...arr] }
           });
@@ -95,7 +104,7 @@ function merge(arr, left, mid, right) {
           steps.push({
             type: 'MERGE_STEP',
             indices: [k],
-            description: `Place ${rightArr[j]} from right sublist`,
+            description: `Place ${rightArr[j]} from right sublist into index ${k}`,
             codeLine: 19,
             variables: { i, j, k, array: [...arr] }
           });
@@ -109,7 +118,7 @@ function merge(arr, left, mid, right) {
         steps.push({
           type: 'MERGE_STEP',
           indices: [k],
-          description: `Remaining element ${leftArr[i]} from left sublist`,
+          description: `Copy remaining element ${leftArr[i]} from left sublist`,
           codeLine: 21,
           variables: { i, k, array: [...arr] }
         });
@@ -122,7 +131,7 @@ function merge(arr, left, mid, right) {
         steps.push({
           type: 'MERGE_STEP',
           indices: [k],
-          description: `Remaining element ${rightArr[j]} from right sublist`,
+          description: `Copy remaining element ${rightArr[j]} from right sublist`,
           codeLine: 22,
           variables: { j, k, array: [...arr] }
         });
@@ -130,11 +139,10 @@ function merge(arr, left, mid, right) {
         k++;
       }
 
-      // Final state of this merge
       steps.push({
         type: 'MARK_SORTED',
         indices: Array.from({ length: r - l + 1 }, (_, i) => l + i),
-        description: `Subarray [${l}...${r}] is merged and sorted`,
+        description: `Subarray [${l}...${r}] successfully merged and sorted!`,
         codeLine: 23,
         variables: { left: l, right: r, array: [...arr] }
       });
@@ -142,12 +150,11 @@ function merge(arr, left, mid, right) {
 
     sort(0, arr.length - 1, 0);
 
-    // Final mark all sorted
     steps.push({
       type: 'MARK_SORTED',
       indices: Array.from({ length: arr.length }, (_, i) => i),
-      description: `Algorithm complete. Entire array is sorted.`,
-      codeLine: 23,
+      description: `Algorithm complete! The array is fully sorted.`,
+      codeLine: 1,
       variables: { array: [...arr] }
     });
 

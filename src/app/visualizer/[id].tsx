@@ -16,7 +16,7 @@ import { PredictionOverlay } from '@/components/visualization/PredictionOverlay'
 import { CodeViewer } from '@/components/visualization/CodeViewer';
 import { AITutorModal } from '@/components/visualization/AITutorModal';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Settings2, Brain, Heart, Code, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { Settings2, Brain, Heart, Code, Sparkles } from 'lucide-react-native';
 import { Button } from '@/components/ui/Button';
 
 export default function VisualizerScreen() {
@@ -24,7 +24,7 @@ export default function VisualizerScreen() {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const { width: windowWidth } = useWindowDimensions();
-  const isDesktop = windowWidth > 800;
+  const isDesktop = windowWidth > 900;
 
   const {
     steps,
@@ -45,7 +45,7 @@ export default function VisualizerScreen() {
   const [isInputModalVisible, setIsInputModalVisible] = useState(false);
   const [isPredictionMode, setIsPredictionMode] = useState(false);
   const [showPrediction, setShowPrediction] = useState(false);
-  const [showCode, setShowCode] = useState(true); // Default to true for side-by-side
+  const [showCode, setShowCode] = useState(true);
   const [isAITutorVisible, setIsAITutorVisible] = useState(false);
 
   const initialData = useMemo(() => {
@@ -62,13 +62,11 @@ export default function VisualizerScreen() {
   const [sortedIndices, setSortedIndices] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
-  // Sync state when initialData changes
   useEffect(() => {
     setCurrentData(initialData);
     setSortedIndices(new Set());
   }, [initialData]);
 
-  // Initialize steps & track view
   useEffect(() => {
     try {
       setError(null);
@@ -82,7 +80,6 @@ export default function VisualizerScreen() {
     }
   }, [algorithm, inputData]);
 
-  // Handle step changes
   useEffect(() => {
     try {
       if (currentStepIndex === -1) {
@@ -142,7 +139,6 @@ export default function VisualizerScreen() {
     }
   };
 
-  // Auto-play logic
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isPlaying && currentStepIndex < steps.length - 1 && !showPrediction) {
@@ -213,7 +209,6 @@ export default function VisualizerScreen() {
 
       <ErrorBoundary>
         <View style={[styles.mainLayout, isDesktop && styles.desktopLayout]}>
-          {/* Code Section */}
           {(showCode || isDesktop) && (
             <View style={[styles.codeSection, isDesktop && styles.desktopCodeSection]}>
               <View style={styles.sectionHeader}>
@@ -226,14 +221,14 @@ export default function VisualizerScreen() {
               />
               {currentEvent?.variables && (
                 <View style={styles.variablesPanel}>
-                  <ThemedText variant="caption" style={{ fontWeight: 'bold', marginBottom: 4 }}>Call Stack & Variables</ThemedText>
+                  <ThemedText variant="caption" style={{ fontWeight: 'bold', marginBottom: 6 }}>Variables</ThemedText>
                   <View style={styles.variablesGrid}>
                     {Object.entries(currentEvent.variables).map(([key, val]) => {
                       if (key === 'array') return null;
                       return (
                         <View key={key} style={[styles.variableBadge, { backgroundColor: colors.backgroundElement }]}>
-                          <ThemedText variant="caption" style={{ color: colors.primary }}>{key}</ThemedText>
-                          <ThemedText variant="caption" style={{ fontWeight: 'bold' }}>{JSON.stringify(val)}</ThemedText>
+                          <ThemedText variant="caption" style={{ color: colors.primary, fontWeight: 'bold' }}>{key}:</ThemedText>
+                          <ThemedText variant="caption">{JSON.stringify(val)}</ThemedText>
                         </View>
                       );
                     })}
@@ -243,9 +238,8 @@ export default function VisualizerScreen() {
             </View>
           )}
 
-          {/* Visualization Section */}
           <View style={[styles.vizSection, isDesktop && styles.desktopVizSection]}>
-             <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '22' }]}>
+             <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '11' }]}>
                 {showPrediction && nextEvent ? (
                   <PredictionOverlay
                     nextEvent={nextEvent}
@@ -257,17 +251,17 @@ export default function VisualizerScreen() {
 
               <View style={styles.descriptionPanel}>
                 <View style={[styles.stepIndicator, { backgroundColor: colors.primary }]}>
-                  <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>STEP {currentStepIndex + 1}</ThemedText>
+                  <ThemedText style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>STEP {currentStepIndex + 1}</ThemedText>
                 </View>
-                <ThemedText variant="h3" style={styles.stepDescription}>
-                  {currentEvent?.description || 'Press Play to begin visualization'}
+                <ThemedText variant="h3" style={styles.stepDescription} numberOfLines={2}>
+                  {currentEvent?.description || 'Press Play to begin'}
                 </ThemedText>
               </View>
           </View>
         </View>
       </ErrorBoundary>
 
-      <View style={[styles.controls, { borderTopColor: colors.backgroundElement }]}>
+      <View style={[styles.controlsContainer, { borderTopColor: colors.backgroundElement }]}>
         <PlaybackControls />
       </View>
 
@@ -296,27 +290,27 @@ const styles = StyleSheet.create({
   },
   mainLayout: {
     flex: 1,
-    flexDirection: 'column',
   },
   desktopLayout: {
     flexDirection: 'row',
   },
   codeSection: {
-    flex: 1,
+    flex: 0.4,
     padding: Spacing.four,
     borderRightWidth: 1,
     borderRightColor: '#eeeeee22',
-  },
-  desktopCodeSection: {
-    flex: 0.4,
     height: '100%',
   },
+  desktopCodeSection: {
+    maxWidth: 500,
+  },
   vizSection: {
-    flex: 1,
+    flex: 0.6,
     padding: Spacing.four,
+    justifyContent: 'space-between',
   },
   desktopVizSection: {
-    flex: 0.6,
+    paddingHorizontal: Spacing.six,
   },
   sectionHeader: {
     marginBottom: Spacing.two,
@@ -325,56 +319,58 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eeeeee22',
   },
   vizContainer: {
-    height: 320,
+    flex: 1,
+    minHeight: 350,
     justifyContent: 'center',
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
-    marginBottom: Spacing.four,
   },
   descriptionPanel: {
     padding: Spacing.four,
-    backgroundColor: '#3b82f611',
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#3b82f6',
+    backgroundColor: '#3b82f608',
+    borderRadius: 16,
+    marginTop: Spacing.four,
+    minHeight: 100,
   },
   stepIndicator: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginBottom: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginBottom: 10,
   },
   stepDescription: {
-    fontSize: 18,
-    lineHeight: 26,
+    fontSize: 20,
+    fontWeight: '500',
+    lineHeight: 28,
   },
   variablesPanel: {
     marginTop: Spacing.four,
-    padding: Spacing.two,
-    borderRadius: 8,
-    backgroundColor: '#00000011',
+    padding: Spacing.three,
+    borderRadius: 12,
+    backgroundColor: '#00000008',
   },
   variablesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
   },
   variableBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 8,
   },
-  controls: {
+  controlsContainer: {
     borderTopWidth: 1,
-    paddingBottom: Spacing.four,
+    paddingBottom: Spacing.eight,
+    paddingTop: Spacing.two,
     backgroundColor: 'transparent',
   },
   settingsBtn: {
-    marginLeft: Spacing.two,
+    marginLeft: Spacing.three,
     opacity: 0.8,
   }
 });

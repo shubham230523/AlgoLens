@@ -21,7 +21,7 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, i
   const shouldReduceMotion = useReducedMotion();
 
   // Static base height calculation
-  const staticHeight = value * (180 / maxVal) + 30;
+  const staticHeight = Math.max(20, (value / maxVal) * 150);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -29,13 +29,13 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, i
       height: shouldReduceMotion ? staticHeight : withSpring(staticHeight, { damping: 15 }),
       opacity: withTiming(isFaded ? 0.3 : 1, { duration: 300 }),
       transform: [
-        { translateY: withSpring(isMerging ? -30 : 0) }
+        { translateY: withSpring(isMerging ? -20 : 0) }
       ]
     };
   });
 
   return (
-    <View style={styles.barWrapper}>
+    <View style={[styles.barWrapper, { width: width + 4 }]}>
       {label && (
         <View style={styles.pointerContainer}>
           <ThemedText variant="caption" style={styles.pointerText}>{label}</ThemedText>
@@ -52,10 +52,9 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, i
           animatedStyle
         ]}
       >
-        {width > 22 && (
-          <ThemedText variant="caption" style={styles.valueText}>{value}</ThemedText>
-        )}
+        <ThemedText variant="caption" style={styles.valueText}>{value}</ThemedText>
       </Animated.View>
+      <ThemedText variant="caption" style={styles.indexText}>{index}</ThemedText>
     </View>
   );
 });
@@ -74,15 +73,15 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
   const safeData = Array.isArray(data) ? data : [];
   const maxVal = useMemo(() => safeData.length > 0 ? Math.max(...safeData, 1) : 1, [safeData]);
 
-  const availableWidth = windowWidth - Spacing.eight;
-  const barWidth = safeData.length > 0 ? Math.max(10, Math.min(45, (availableWidth / safeData.length) - 4)) : 40;
+  const availableWidth = Math.min(windowWidth * 0.55, 600); // Take into account desktop side-panel
+  const barWidth = safeData.length > 0 ? Math.max(25, Math.min(60, (availableWidth / safeData.length) - 8)) : 40;
 
   const getElementColor = (index: number) => {
     if (sortedIndices.has(index)) return colors.sorted;
     if (currentEvent?.indices.includes(index)) {
       if (currentEvent.type === 'COMPARE') return colors.compare;
       if (currentEvent.type === 'SWAP' || currentEvent.type === 'MERGE_STEP' || currentEvent.type === 'UPDATE_VALUE') return colors.swap;
-      if (currentEvent.type === 'HIGHLIGHT' || currentEvent.type === 'SUBARRAY_FOCUS') return colors.primary + 'AA';
+      if (currentEvent.type === 'HIGHLIGHT' || currentEvent.type === 'SUBARRAY_FOCUS') return colors.primary;
       return colors.active;
     }
     return scheme === 'dark' ? '#2A334D' : '#E0E0E6';
@@ -92,7 +91,7 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
     if (!currentEvent?.variables) return undefined;
     const labels = [];
     for (const [key, val] of Object.entries(currentEvent.variables)) {
-      if (val === index && ['i', 'j', 'low', 'high', 'mid', 'left', 'right', 'pivot'].includes(key)) {
+      if (val === index && ['i', 'j', 'k', 'low', 'high', 'mid', 'left', 'right', 'pivot'].includes(key)) {
         labels.push(key);
       }
     }
@@ -101,64 +100,80 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
 
   return (
     <View style={styles.container}>
-      {safeData.map((value, index) => {
-        const isFaded = !!(currentEvent?.type === 'SUBARRAY_FOCUS' && !currentEvent.indices.includes(index));
-        const isMerging = !!(currentEvent?.type === 'MERGE_STEP' && currentEvent.indices.includes(index));
+      <View style={styles.arrayRow}>
+        {safeData.map((value, index) => {
+          const isFaded = !!(currentEvent?.type === 'SUBARRAY_FOCUS' && !currentEvent.indices.includes(index));
+          const isMerging = !!(currentEvent?.type === 'MERGE_STEP' && currentEvent.indices.includes(index));
 
-        return (
-          <MemoizedBar
-            key={`bar-${index}`} // Keep key stable to allow Reanimated transitions
-            index={index}
-            value={value}
-            color={getElementColor(index)}
-            width={barWidth}
-            maxVal={maxVal}
-            isFaded={isFaded}
-            isMerging={isMerging}
-            label={getLabelForIndex(index)}
-          />
-        );
-      })}
+          return (
+            <MemoizedBar
+              key={`bar-${index}`}
+              index={index}
+              value={value}
+              color={getElementColor(index)}
+              width={barWidth}
+              maxVal={maxVal}
+              isFaded={isFaded}
+              isMerging={isMerging}
+              label={getLabelForIndex(index)}
+            />
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 40,
+  },
+  arrayRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'center',
-    height: 260,
-    paddingVertical: Spacing.two,
   },
   barWrapper: {
     alignItems: 'center',
     justifyContent: 'flex-end',
+    marginHorizontal: 2,
   },
   bar: {
-    marginHorizontal: 2,
-    borderRadius: 4,
-    justifyContent: 'flex-end',
+    borderRadius: 6,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: Spacing.one,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.1)',
   },
   valueText: {
     fontWeight: 'bold',
+    fontSize: 12,
+    color: '#000',
+    textShadowColor: 'rgba(255,255,255,0.5)',
+    textShadowRadius: 2,
+  },
+  indexText: {
+    marginTop: 8,
     fontSize: 10,
-    marginBottom: 2,
+    opacity: 0.5,
   },
   pointerContainer: {
     position: 'absolute',
-    top: -25,
+    top: -30,
     backgroundColor: '#3b82f6',
-    paddingHorizontal: 4,
-    paddingVertical: 1,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 4,
-    zIndex: 10,
+    zIndex: 20,
+    minWidth: 20,
+    alignItems: 'center',
   },
   pointerText: {
     color: '#fff',
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: 'bold',
   }
 });
