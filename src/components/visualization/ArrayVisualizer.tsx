@@ -162,24 +162,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   }
 });
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    height: 240,
-    paddingVertical: Spacing.two,
-  },
-  bar: {
-    marginHorizontal: 2,
-    borderRadius: 4,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: Spacing.one,
-  },
-  valueText: {
-    fontWeight: 'bold',
-    fontSize: 10,
-  }
-});
