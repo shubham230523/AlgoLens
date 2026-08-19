@@ -23,7 +23,7 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal }: BarProps
   const animatedStyle = useAnimatedStyle(() => {
     return {
       backgroundColor: shouldReduceMotion ? color : withTiming(color, { duration: 300 }),
-      height: shouldReduceMotion ? staticHeight : withSpring(staticHeight),
+      height: shouldReduceMotion ? staticHeight : withSpring(staticHeight, { damping: 15 }),
     };
   }, [color, value, maxVal, shouldReduceMotion, staticHeight]);
 
@@ -33,8 +33,7 @@ const MemoizedBar = React.memo(({ value, index, color, width, maxVal }: BarProps
         styles.bar,
         {
           width,
-          backgroundColor: color, // Fallback background
-          height: staticHeight, // Fallback height
+          backgroundColor: color,
         },
         animatedStyle
       ]}
@@ -104,8 +103,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'center',
-    height: 250,
-    paddingVertical: Spacing.four,
+    height: 240,
+    paddingVertical: Spacing.two,
   },
   bar: {
     marginHorizontal: 2,

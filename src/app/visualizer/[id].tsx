@@ -313,14 +313,14 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
   },
   vizContainer: {
-    minHeight: 320,
+    height: 280,
     justifyContent: 'center',
     marginBottom: Spacing.four,
     borderRadius: 16,
     overflow: 'hidden',
   },
   errorContainer: {
-    minHeight: 320,
+    height: 280,
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.four,
