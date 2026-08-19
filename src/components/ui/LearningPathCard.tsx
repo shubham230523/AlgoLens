@@ -1,6 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Card } from './Card';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -24,48 +23,49 @@ export function LearningPathCard({ path, onPress }: LearningPathCardProps) {
   const progress = path.algorithmIds.length > 0 ? completedCount / path.algorithmIds.length : 0;
 
   return (
-    <Card style={styles.card} onPress={onPress}>
-      <View style={styles.inner} pointerEvents="none">
-        <View style={styles.header}>
-          <View style={[styles.iconContainer, { backgroundColor: colors.primary + '22' }]}>
-            <IconComponent color={colors.primary} size={24} />
-          </View>
-          <View style={[styles.difficultyBadge, { backgroundColor: colors.backgroundSelected }]}>
-            <ThemedText variant="caption" style={{ color: colors.textSecondary }}>{path.difficulty}</ThemedText>
-          </View>
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: colors.backgroundElement }]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.header}>
+        <View style={[styles.iconContainer, { backgroundColor: colors.primary + '22' }]}>
+          <IconComponent color={colors.primary} size={24} />
         </View>
-
-        <ThemedText variant="h3" style={styles.title}>{path.title}</ThemedText>
-        <ThemedText variant="caption" numberOfLines={2} style={styles.description}>
-          {path.description}
-        </ThemedText>
-
-        <View style={styles.footer}>
-          <View style={styles.progressContainer}>
-            <View style={[styles.progressBar, { backgroundColor: colors.backgroundSelected }]}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { backgroundColor: colors.success, width: `${progress * 100}%` }
-                ]}
-              />
-            </View>
-            <ThemedText variant="caption" style={styles.progressText}>
-              {completedCount}/{path.algorithmIds.length}
-            </ThemedText>
-          </View>
+        <View style={[styles.difficultyBadge, { backgroundColor: colors.backgroundSelected }]}>
+          <ThemedText variant="caption" style={{ color: colors.textSecondary }}>{path.difficulty}</ThemedText>
         </View>
       </View>
-    </Card>
+
+      <ThemedText variant="h3" style={styles.title}>{path.title}</ThemedText>
+      <ThemedText variant="caption" numberOfLines={2} style={styles.description}>
+        {path.description}
+      </ThemedText>
+
+      <View style={styles.footer}>
+        <View style={styles.progressContainer}>
+          <View style={[styles.progressBar, { backgroundColor: colors.backgroundSelected }]}>
+            <View
+              style={[
+                styles.progressFill,
+                { backgroundColor: colors.success, width: `${progress * 100}%` }
+              ]}
+            />
+          </View>
+          <ThemedText variant="caption" style={styles.progressText}>
+            {completedCount}/{path.algorithmIds.length}
+          </ThemedText>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     width: 280,
-  },
-  inner: {
-    flex: 1,
+    padding: Spacing.three,
+    borderRadius: 12,
   },
   header: {
     flexDirection: 'row',

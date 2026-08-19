@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Platform } from 'react-native';
 import { useColorScheme } from 'react-native';
 import { Colors, Spacing } from '@/constants/theme';
 import { ThemedText } from '@/components/ui/ThemedText';
@@ -15,6 +15,16 @@ export default function HomeScreen() {
 
   const featuredAlgorithms = ALL_ALGORITHMS.slice(0, 3);
 
+  const handleNavigateToPath = (id: string) => {
+    console.log('Pushing to path:', id);
+    router.push(`/path/${id}`);
+  };
+
+  const handleNavigateToAlgo = (id: string) => {
+    console.log('Pushing to algo:', id);
+    router.push(`/visualizer/${id}`);
+  };
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
@@ -29,7 +39,7 @@ export default function HomeScreen() {
             <LearningPathCard
               key={path.id}
               path={path}
-              onPress={() => router.push(`/path/${path.id}`)}
+              onPress={() => handleNavigateToPath(path.id)}
             />
           ))}
         </ScrollView>
@@ -42,7 +52,7 @@ export default function HomeScreen() {
             <AlgorithmCard
               key={algo.id}
               algorithm={algo}
-              onPress={() => router.push(`/visualizer/${algo.id}`)}
+              onPress={() => handleNavigateToAlgo(algo.id)}
             />
           ))}
         </View>
@@ -52,7 +62,11 @@ export default function HomeScreen() {
         <ThemedText variant="h2" style={styles.sectionTitle}>Categories</ThemedText>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
           {CATEGORIES.map(category => (
-            <Card key={category} style={styles.categoryCard} onPress={() => router.push({ pathname: '/explore', params: { category } })}>
+            <Card
+              key={category}
+              style={styles.categoryCard}
+              onPress={() => router.push({ pathname: '/explore', params: { category } })}
+            >
               <ThemedText variant="h3">{category}</ThemedText>
             </Card>
           ))}
@@ -68,7 +82,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: Spacing.four,
-    paddingTop: Spacing.five,
+    paddingTop: Platform.OS === 'web' ? Spacing.five : Spacing.five,
   },
   section: {
     paddingVertical: Spacing.four,
