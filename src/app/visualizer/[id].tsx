@@ -17,7 +17,6 @@ import { CodeViewer } from '@/components/visualization/CodeViewer';
 import { AITutorModal } from '@/components/visualization/AITutorModal';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Settings2, Brain, Heart, Code, Sparkles } from 'lucide-react-native';
-import { Button } from '@/components/ui/Button';
 
 export default function VisualizerScreen() {
   const { id } = useLocalSearchParams();
@@ -209,6 +208,7 @@ export default function VisualizerScreen() {
 
       <ErrorBoundary>
         <View style={[styles.mainLayout, isDesktop && styles.desktopLayout]}>
+          {/* Code Section */}
           {(showCode || isDesktop) && (
             <View style={[styles.codeSection, isDesktop && styles.desktopCodeSection]}>
               <View style={styles.sectionHeader}>
@@ -221,7 +221,7 @@ export default function VisualizerScreen() {
               />
               {currentEvent?.variables && (
                 <View style={styles.variablesPanel}>
-                  <ThemedText variant="caption" style={{ fontWeight: 'bold', marginBottom: 6 }}>Variables</ThemedText>
+                  <ThemedText variant="caption" style={{ fontWeight: 'bold', marginBottom: 6 }}>State</ThemedText>
                   <View style={styles.variablesGrid}>
                     {Object.entries(currentEvent.variables).map(([key, val]) => {
                       if (key === 'array') return null;
@@ -238,6 +238,7 @@ export default function VisualizerScreen() {
             </View>
           )}
 
+          {/* Visualization Section */}
           <View style={[styles.vizSection, isDesktop && styles.desktopVizSection]}>
              <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '11' }]}>
                 {showPrediction && nextEvent ? (
@@ -253,7 +254,7 @@ export default function VisualizerScreen() {
                 <View style={[styles.stepIndicator, { backgroundColor: colors.primary }]}>
                   <ThemedText style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>STEP {currentStepIndex + 1}</ThemedText>
                 </View>
-                <ThemedText variant="h3" style={styles.stepDescription} numberOfLines={2}>
+                <ThemedText variant="h3" style={styles.stepDescription} numberOfLines={3}>
                   {currentEvent?.description || 'Press Play to begin'}
                 </ThemedText>
               </View>
@@ -261,7 +262,7 @@ export default function VisualizerScreen() {
         </View>
       </ErrorBoundary>
 
-      <View style={[styles.controlsContainer, { borderTopColor: colors.backgroundElement }]}>
+      <View style={[styles.controlsOuter, { borderTopColor: colors.backgroundElement }]}>
         <PlaybackControls />
       </View>
 
@@ -290,24 +291,24 @@ const styles = StyleSheet.create({
   },
   mainLayout: {
     flex: 1,
+    paddingBottom: 10, // Ensure space before controls
   },
   desktopLayout: {
     flexDirection: 'row',
   },
   codeSection: {
-    flex: 0.4,
+    flex: 0.38,
     padding: Spacing.four,
     borderRightWidth: 1,
     borderRightColor: '#eeeeee22',
-    height: '100%',
   },
   desktopCodeSection: {
-    maxWidth: 500,
+    maxWidth: 450,
   },
   vizSection: {
-    flex: 0.6,
+    flex: 0.62,
     padding: Spacing.four,
-    justifyContent: 'space-between',
+    paddingBottom: 20, // Add padding at bottom
   },
   desktopVizSection: {
     paddingHorizontal: Spacing.six,
@@ -319,25 +320,27 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eeeeee22',
   },
   vizContainer: {
-    flex: 1,
-    minHeight: 350,
+    height: 350,
     justifyContent: 'center',
-    borderRadius: 20,
+    borderRadius: 24,
     overflow: 'hidden',
+    marginBottom: Spacing.four,
   },
   descriptionPanel: {
     padding: Spacing.four,
     backgroundColor: '#3b82f608',
     borderRadius: 16,
-    marginTop: Spacing.four,
-    minHeight: 100,
+    borderLeftWidth: 4,
+    borderLeftColor: '#3b82f6',
+    minHeight: 110,
+    justifyContent: 'center',
   },
   stepIndicator: {
     alignSelf: 'flex-start',
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 6,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   stepDescription: {
     fontSize: 20,
@@ -353,21 +356,19 @@ const styles = StyleSheet.create({
   variablesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
   variableBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    gap: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 6,
   },
-  controlsContainer: {
+  controlsOuter: {
     borderTopWidth: 1,
-    paddingBottom: Spacing.eight,
     paddingTop: Spacing.two,
-    backgroundColor: 'transparent',
   },
   settingsBtn: {
     marginLeft: Spacing.three,

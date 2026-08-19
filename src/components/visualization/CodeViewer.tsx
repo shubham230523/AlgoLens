@@ -30,6 +30,9 @@ export function CodeViewer({ code, activeLine, language = 'javascript', isDeskto
     }
   }, [activeLine, isDesktop]);
 
+  // Ensure code has consistent indentation
+  const formattedCode = code.trim();
+
   return (
     <View style={[
         styles.container,
@@ -57,24 +60,24 @@ export function CodeViewer({ code, activeLine, language = 'javascript', isDeskto
             color: colors.textSecondary,
             opacity: 0.5,
             textAlign: 'right',
+            backgroundColor: 'transparent',
           }}
           lineProps={(lineNumber: number) => {
             const isActive = lineNumber === activeLine;
             return {
               style: {
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
+                display: 'block',
                 width: '100%',
-                backgroundColor: isActive ? colors.active + '33' : 'transparent',
+                backgroundColor: isActive ? 'rgba(59, 130, 246, 0.25)' : 'transparent', // Distinct highlight
                 borderLeftWidth: isActive ? 4 : 0,
-                borderLeftColor: colors.active,
+                borderLeftColor: '#3b82f6',
                 height: 24,
+                paddingLeft: 4,
               },
             };
           }}
         >
-          {code}
+          {formattedCode}
         </SyntaxHighlighter>
       </ScrollView>
     </View>
@@ -86,6 +89,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
     marginVertical: Spacing.two,
+    flex: 1,
   },
   scrollView: {
     flex: 1,
