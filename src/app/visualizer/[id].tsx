@@ -92,9 +92,14 @@ export default function VisualizerScreen() {
       const newData = Array.isArray(initialData) ? [...initialData] : (typeof initialData === 'object' ? {...initialData} : initialData);
       const newSorted = new Set<number>();
 
+      // Optimized: Apply steps up to current index
       for (let i = 0; i <= currentStepIndex; i++) {
         applyStep(steps[i], newData, newSorted);
       }
+
+      // Special handling for SWAP animation:
+      // We want to briefly show the elements at their indices before the state update triggers re-render
+      // However, Reanimated handles the transition of positions automatically if we keep keys stable.
 
       setCurrentData(newData);
       setSortedIndices(newSorted);

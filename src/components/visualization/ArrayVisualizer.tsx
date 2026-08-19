@@ -81,7 +81,8 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
     if (sortedIndices.has(index)) return colors.sorted;
     if (currentEvent?.indices.includes(index)) {
       if (currentEvent.type === 'COMPARE') return colors.compare;
-      if (currentEvent.type === 'SWAP' || currentEvent.type === 'MERGE_STEP') return colors.swap;
+      if (currentEvent.type === 'SWAP' || currentEvent.type === 'MERGE_STEP' || currentEvent.type === 'UPDATE_VALUE') return colors.swap;
+      if (currentEvent.type === 'HIGHLIGHT' || currentEvent.type === 'SUBARRAY_FOCUS') return colors.primary + 'AA';
       return colors.active;
     }
     return scheme === 'dark' ? '#2A334D' : '#E0E0E6';
