@@ -21,7 +21,6 @@
     },
     "web": {
       "output": "static",
-      "baseUrl": "/AlgoLens-",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -36,6 +35,7 @@
       ]
     ],
     "experiments": {
+      "baseUrl": "/AlgoLens-",
       "typedRoutes": true,
       "reactCompiler": true
     }
