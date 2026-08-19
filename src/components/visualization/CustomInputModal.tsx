@@ -30,12 +30,47 @@ export function CustomInputModal({ isVisible, onClose, onSubmit, initialValue, t
     type === 'SEARCH' ? String(initialValue.target) : ''
   );
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleRandomize = () => {
     const random = generateRandomArray({ size: 8, min: 1, max: 50 });
     setRawInput(random.join(', '));
+    setError(null);
+  };
+
+  const validate = (): boolean => {
+    const array = parseInputArray(rawInput);
+
+    if (array.length === 0) {
+      setError('Please enter at least one number');
+      return false;
+    }
+
+    if (array.length > 50) {
+      setError('Array size is limited to 50 for performance');
+      return false;
+    }
+
+    if (array.some(isNaN)) {
+      setError('Please enter valid numbers separated by commas');
+      return false;
+    }
+
+    if (type === 'SEARCH') {
+      const targetVal = parseInt(target, 10);
+      if (isNaN(targetVal)) {
+        setError('Please enter a valid target number');
+        return false;
+      }
+    }
+
+    setError(null);
+    return true;
   };
 
   const handleSubmit = () => {
+    if (!validate()) return;
+
     const array = parseInputArray(rawInput);
     if (type === 'SEARCH') {
       onSubmit({ array, target: parseInt(target, 10) });
@@ -64,12 +99,22 @@ export function CustomInputModal({ isVisible, onClose, onSubmit, initialValue, t
               </View>
 
               <ScrollView style={styles.form}>
+                {error && (
+                  <View style={[styles.errorContainer, { backgroundColor: colors.error + '22' }]}>
+                    <ThemedText variant="caption" style={{ color: colors.error }}>{error}</ThemedText>
+                  </View>
+                )}
+
                 <Input
                   label="Array (comma separated)"
                   value={rawInput}
-                  onChangeText={setRawInput}
+                  onChangeText={(text) => {
+                    setRawInput(text);
+                    if (error) setError(null);
+                  }}
                   placeholder="e.g. 5, 2, 8, 1"
                   multiline
+                  error={error && rawInput.length === 0 ? error : undefined}
                 />
 
                 {type === 'SEARCH' && (
@@ -129,6 +174,11 @@ const styles = StyleSheet.create({
   },
   form: {
     marginBottom: Spacing.six,
+  },
+  errorContainer: {
+    padding: Spacing.two,
+    borderRadius: 8,
+    marginBottom: Spacing.two,
   },
   actions: {
     flexDirection: 'row',

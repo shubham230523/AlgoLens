@@ -3,6 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
 import { useEffect, useState } from 'react';
 import { loadAppAssets } from '@/lib/assetManager';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 import AppTabs from '@/components/app-tabs';
 
@@ -32,8 +33,10 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AppTabs />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <AppTabs />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

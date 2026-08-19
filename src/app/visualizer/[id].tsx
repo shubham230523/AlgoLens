@@ -57,59 +57,71 @@ export default function VisualizerScreen() {
 
   const [currentData, setCurrentData] = useState<any>(initialData);
   const [sortedIndices, setSortedIndices] = useState<Set<number>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   const prevStepIndexRef = useRef<number>(-1);
 
   // Initialize steps & track view
   useEffect(() => {
-    const generatedSteps = algorithm.generateSteps(inputData);
-    setSteps(generatedSteps);
-    reset();
-    markViewed(algorithm.id);
+    try {
+      setError(null);
+      const generatedSteps = algorithm.generateSteps(inputData);
+      setSteps(generatedSteps);
+      reset();
+      markViewed(algorithm.id);
+    } catch (e) {
+      console.error('Failed to generate steps:', e);
+      setError('Failed to initialize algorithm visualization.');
+    }
   }, [algorithm, inputData]);
 
   // Handle step changes with optimization
   useEffect(() => {
-    const prevIndex = prevStepIndexRef.current;
+    try {
+      const prevIndex = prevStepIndexRef.current;
 
-    // Full reset
-    if (currentStepIndex === -1) {
-      setCurrentData(initialData);
-      setSortedIndices(new Set());
-      prevStepIndexRef.current = -1;
-      return;
-    }
+      // Full reset
+      if (currentStepIndex === -1) {
+        setCurrentData(initialData);
+        setSortedIndices(new Set());
+        prevStepIndexRef.current = -1;
+        return;
+      }
 
-    if (algorithm.visualizationType === 'GRAPH') {
-        setCurrentData(inputData);
-    } else {
-        let newData: any;
-        let newSorted: Set<number>;
+      if (algorithm.visualizationType === 'GRAPH') {
+          setCurrentData(inputData);
+      } else {
+          let newData: any;
+          let newSorted: Set<number>;
 
-        // Optimization: If only one step forward, apply delta to current state
-        if (currentStepIndex === prevIndex + 1 && prevIndex >= -1) {
-            newData = Array.isArray(currentData) ? [...currentData] : currentData;
-            newSorted = new Set(sortedIndices);
-            const step = steps[currentStepIndex];
-            applyStep(step, newData, newSorted);
-        } else {
-            // Re-calculate from scratch
-            newData = Array.isArray(initialData) ? [...initialData] : initialData;
-            newSorted = new Set<number>();
-            for (let i = 0; i <= currentStepIndex; i++) {
-              applyStep(steps[i], newData, newSorted);
-            }
-        }
+          // Optimization: If only one step forward, apply delta to current state
+          if (currentStepIndex === prevIndex + 1 && prevIndex >= -1) {
+              newData = Array.isArray(currentData) ? [...currentData] : currentData;
+              newSorted = new Set(sortedIndices);
+              const step = steps[currentStepIndex];
+              applyStep(step, newData, newSorted);
+          } else {
+              // Re-calculate from scratch
+              newData = Array.isArray(initialData) ? [...initialData] : initialData;
+              newSorted = new Set<number>();
+              for (let i = 0; i <= currentStepIndex; i++) {
+                applyStep(steps[i], newData, newSorted);
+              }
+          }
 
-        setCurrentData(newData);
-        setSortedIndices(newSorted);
-    }
+          setCurrentData(newData);
+          setSortedIndices(newSorted);
+      }
 
-    prevStepIndexRef.current = currentStepIndex;
+      prevStepIndexRef.current = currentStepIndex;
 
-    // Track completion
-    if (currentStepIndex === steps.length - 1 && steps.length > 0) {
-      completeAlgorithm(algorithm.id);
+      // Track completion
+      if (currentStepIndex === steps.length - 1 && steps.length > 0) {
+        completeAlgorithm(algorithm.id);
+      }
+    } catch (e) {
+      console.error('Error during step processing:', e);
+      setError('An error occurred during visualization.');
     }
 
     // Prediction trigger
@@ -200,62 +212,71 @@ export default function VisualizerScreen() {
 
       <ErrorBoundary>
         <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.vizContainer}>
-            {showPrediction && nextEvent ? (
-              <PredictionOverlay
-                nextEvent={nextEvent}
-                onCorrect={() => { setShowPrediction(false); nextStep(); }}
-                onIncorrect={() => { setShowPrediction(false); nextStep(); }}
-              />
-            ) : (
-              <>
-                {algorithm.visualizationType === 'TREE' ? (
-                  <TreeVisualizer
-                    data={currentData}
-                    currentEvent={currentEvent}
-                    sortedIndices={sortedIndices}
-                  />
-                ) : algorithm.visualizationType === 'GRAPH' ? (
-                  <GraphVisualizer
-                    data={currentData}
-                    currentEvent={currentEvent}
-                    sortedIndices={sortedIndices}
+          {error ? (
+             <View style={styles.errorContainer}>
+               <ThemedText variant="h3" style={{ color: colors.error }}>{error}</ThemedText>
+               <Button title="Reset Visualization" onPress={reset} style={{ marginTop: Spacing.four }} />
+             </View>
+          ) : (
+            <>
+              <View style={styles.vizContainer}>
+                {showPrediction && nextEvent ? (
+                  <PredictionOverlay
+                    nextEvent={nextEvent}
+                    onCorrect={() => { setShowPrediction(false); nextStep(); }}
+                    onIncorrect={() => { setShowPrediction(false); nextStep(); }}
                   />
                 ) : (
-                  <ArrayVisualizer
-                    data={currentData}
-                    currentEvent={currentEvent}
-                    sortedIndices={sortedIndices}
-                  />
+                  <>
+                    {algorithm.visualizationType === 'TREE' ? (
+                      <TreeVisualizer
+                        data={currentData}
+                        currentEvent={currentEvent}
+                        sortedIndices={sortedIndices}
+                      />
+                    ) : algorithm.visualizationType === 'GRAPH' ? (
+                      <GraphVisualizer
+                        data={currentData}
+                        currentEvent={currentEvent}
+                        sortedIndices={sortedIndices}
+                      />
+                    ) : (
+                      <ArrayVisualizer
+                        data={currentData}
+                        currentEvent={currentEvent}
+                        sortedIndices={sortedIndices}
+                      />
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </View>
+              </View>
 
-          {!showPrediction && (
-            <View style={styles.infoContainer}>
-              <ThemedText variant="h3">{currentEvent?.description || 'Press Play to Start'}</ThemedText>
+              {!showPrediction && (
+                <View style={styles.infoContainer}>
+                  <ThemedText variant="h3">{currentEvent?.description || 'Press Play to Start'}</ThemedText>
 
-              {showCode && (
-                <CodeViewer
-                  code={algorithm.code}
-                  activeLine={currentEvent?.codeLine}
-                />
-              )}
+                  {showCode && (
+                    <CodeViewer
+                      code={algorithm.code}
+                      activeLine={currentEvent?.codeLine}
+                    />
+                  )}
 
-              {currentEvent?.variables && (
-                <View style={styles.variables}>
-                  {Object.entries(currentEvent.variables).map(([key, val]) => {
-                    if (key === 'array') return null;
-                    return (
-                      <ThemedText key={key} variant="caption">
-                        {key}: {JSON.stringify(val)}
-                      </ThemedText>
-                    );
-                  })}
+                  {currentEvent?.variables && (
+                    <View style={styles.variables}>
+                      {Object.entries(currentEvent.variables).map(([key, val]) => {
+                        if (key === 'array') return null;
+                        return (
+                          <ThemedText key={key} variant="caption">
+                            {key}: {JSON.stringify(val)}
+                          </ThemedText>
+                        );
+                      })}
+                    </View>
+                  )}
                 </View>
               )}
-            </View>
+            </>
           )}
         </ScrollView>
       </ErrorBoundary>
@@ -293,6 +314,12 @@ const styles = StyleSheet.create({
   vizContainer: {
     minHeight: 350,
     justifyContent: 'center',
+  },
+  errorContainer: {
+    minHeight: 350,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.four,
   },
   infoContainer: {
     padding: Spacing.three,

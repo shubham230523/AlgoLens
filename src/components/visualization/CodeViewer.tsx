@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import SyntaxHighlighter from 'react-native-syntax-highlighter';
-import { atomDark, prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { atomDark, prism } from 'react-syntax-highlighter/dist/styles/prism';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 
