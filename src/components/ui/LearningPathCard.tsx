@@ -25,33 +25,35 @@ export function LearningPathCard({ path, onPress }: LearningPathCardProps) {
 
   return (
     <Card style={styles.card} onPress={onPress}>
-      <View style={styles.header}>
-        <View style={[styles.iconContainer, { backgroundColor: colors.primary + '22' }]}>
-          <IconComponent color={colors.primary} size={24} />
-        </View>
-        <View style={[styles.difficultyBadge, { backgroundColor: colors.backgroundSelected }]}>
-          <ThemedText variant="caption" style={{ color: colors.textSecondary }}>{path.difficulty}</ThemedText>
-        </View>
-      </View>
-
-      <ThemedText variant="h3" style={styles.title}>{path.title}</ThemedText>
-      <ThemedText variant="caption" numberOfLines={2} style={styles.description}>
-        {path.description}
-      </ThemedText>
-
-      <View style={styles.footer}>
-        <View style={styles.progressContainer}>
-          <View style={[styles.progressBar, { backgroundColor: colors.backgroundSelected }]}>
-            <View
-              style={[
-                styles.progressFill,
-                { backgroundColor: colors.success, width: `${progress * 100}%` }
-              ]}
-            />
+      <View style={styles.inner} pointerEvents="none">
+        <View style={styles.header}>
+          <View style={[styles.iconContainer, { backgroundColor: colors.primary + '22' }]}>
+            <IconComponent color={colors.primary} size={24} />
           </View>
-          <ThemedText variant="caption" style={styles.progressText}>
-            {completedCount}/{path.algorithmIds.length}
-          </ThemedText>
+          <View style={[styles.difficultyBadge, { backgroundColor: colors.backgroundSelected }]}>
+            <ThemedText variant="caption" style={{ color: colors.textSecondary }}>{path.difficulty}</ThemedText>
+          </View>
+        </View>
+
+        <ThemedText variant="h3" style={styles.title}>{path.title}</ThemedText>
+        <ThemedText variant="caption" numberOfLines={2} style={styles.description}>
+          {path.description}
+        </ThemedText>
+
+        <View style={styles.footer}>
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressBar, { backgroundColor: colors.backgroundSelected }]}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { backgroundColor: colors.success, width: `${progress * 100}%` }
+                ]}
+              />
+            </View>
+            <ThemedText variant="caption" style={styles.progressText}>
+              {completedCount}/{path.algorithmIds.length}
+            </ThemedText>
+          </View>
         </View>
       </View>
     </Card>
@@ -61,7 +63,9 @@ export function LearningPathCard({ path, onPress }: LearningPathCardProps) {
 const styles = StyleSheet.create({
   card: {
     width: 280,
-    padding: Spacing.three,
+  },
+  inner: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',

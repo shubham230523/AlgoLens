@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { AlgorithmMetadata } from '@/types/algorithm';
@@ -24,7 +24,7 @@ export function AlgorithmCard({ algorithm, onPress }: AlgorithmCardProps) {
 
   return (
     <Card onPress={onPress} style={styles.card}>
-      <View style={styles.content}>
+      <View style={styles.content} pointerEvents="none">
         <View style={styles.header}>
           <ThemedText variant="h3">{algorithm.name}</ThemedText>
           <View style={[styles.badge, { backgroundColor: difficultyColor + '20' }]}>

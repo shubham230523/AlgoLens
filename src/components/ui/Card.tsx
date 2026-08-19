@@ -40,13 +40,10 @@ export function Card({ children, style, onPress, variant = 'default' }: CardProp
         styles.card,
         variantStyles[variant],
         style,
-        pressed && onPress && { opacity: 0.7, transform: [{ scale: 0.99 }] },
+        pressed && onPress && { opacity: 0.7, transform: [{ scale: 0.98 }] },
       ]}
-      pointerEvents="auto"
     >
-      <View pointerEvents="none">
-        {children}
-      </View>
+      {children}
     </Pressable>
   );
 }
@@ -56,5 +53,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: Spacing.three,
     marginVertical: Spacing.one,
+    overflow: 'hidden',
   },
 });
