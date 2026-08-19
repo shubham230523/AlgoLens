@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import Animated, { useAnimatedProps, withSpring, useReducedMotion } from 'react-native-reanimated';
+import Animated, { useAnimatedProps, withSpring, withTiming, useReducedMotion } from 'react-native-reanimated';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { VisualizationEvent } from '@/types/algorithm';

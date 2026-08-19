@@ -25,8 +25,8 @@ const GEMINI_DARK = {
   border: '#3c4043',
   text: '#e3e3e3',
   comment: '#9aa0a6',
-  highlight: 'rgba(108, 99, 255, 0.35)', // More visible theme-matched color
-  highlightBorder: '#6C63FF', // Primary theme color
+  highlight: 'rgba(108, 99, 255, 0.4)', // Higher opacity
+  highlightBorder: '#818CF8', // Brighter indigo for better contrast
 };
 
 const FONT_MONO = Platform.select({
@@ -151,17 +151,21 @@ export function CodeViewer({
                 backgroundColor: 'transparent',
                 fontFamily: FONT_MONO,
               }}
-              lineProps={(lineNumber: number) => ({
-                style: {
-                  height: LINE_HEIGHT,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingLeft: 4,
-                  backgroundColor: lineNumber === activeLine ? GEMINI_DARK.highlight : 'transparent',
-                  borderLeftWidth: lineNumber === activeLine ? 4 : 0,
-                  borderLeftColor: GEMINI_DARK.highlightBorder,
-                },
-              })}
+              lineProps={(lineNumber: number) => {
+                const isSelected = lineNumber === activeLine;
+                return {
+                  style: {
+                    height: LINE_HEIGHT,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingLeft: 4,
+                    width: '100%',
+                    backgroundColor: isSelected ? GEMINI_DARK.highlight : 'transparent',
+                    borderLeftWidth: isSelected ? 4 : 0,
+                    borderLeftColor: GEMINI_DARK.highlightBorder,
+                  },
+                };
+              }}
             >
               {code[selectedLanguage]}
             </SyntaxHighlighter>
