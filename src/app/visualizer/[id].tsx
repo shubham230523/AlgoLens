@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -16,13 +16,15 @@ import { PredictionOverlay } from '@/components/visualization/PredictionOverlay'
 import { CodeViewer } from '@/components/visualization/CodeViewer';
 import { AITutorModal } from '@/components/visualization/AITutorModal';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Settings2, Brain, Heart, Code, Sparkles } from 'lucide-react-native';
+import { Settings2, Brain, Heart, Code, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { Button } from '@/components/ui/Button';
 
 export default function VisualizerScreen() {
   const { id } = useLocalSearchParams();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
+  const { width: windowWidth } = useWindowDimensions();
+  const isDesktop = windowWidth > 800;
 
   const {
     steps,
@@ -43,7 +45,7 @@ export default function VisualizerScreen() {
   const [isInputModalVisible, setIsInputModalVisible] = useState(false);
   const [isPredictionMode, setIsPredictionMode] = useState(false);
   const [showPrediction, setShowPrediction] = useState(false);
-  const [showCode, setShowCode] = useState(false);
+  const [showCode, setShowCode] = useState(true); // Default to true for side-by-side
   const [isAITutorVisible, setIsAITutorVisible] = useState(false);
 
   const initialData = useMemo(() => {
@@ -92,19 +94,13 @@ export default function VisualizerScreen() {
       const newData = Array.isArray(initialData) ? [...initialData] : (typeof initialData === 'object' ? {...initialData} : initialData);
       const newSorted = new Set<number>();
 
-      // Optimized: Apply steps up to current index
       for (let i = 0; i <= currentStepIndex; i++) {
         applyStep(steps[i], newData, newSorted);
       }
 
-      // Special handling for SWAP animation:
-      // We want to briefly show the elements at their indices before the state update triggers re-render
-      // However, Reanimated handles the transition of positions automatically if we keep keys stable.
-
       setCurrentData(newData);
       setSortedIndices(newSorted);
 
-      // Track completion
       if (currentStepIndex === steps.length - 1 && steps.length > 0) {
         completeAlgorithm(algorithm.id);
       }
@@ -113,7 +109,6 @@ export default function VisualizerScreen() {
       setError('An error occurred during visualization.');
     }
 
-    // Prediction trigger
     if (isPredictionMode && !showPrediction && currentStepIndex < steps.length - 1) {
       if (Math.random() > 0.8) {
         pause();
@@ -125,7 +120,6 @@ export default function VisualizerScreen() {
   const applyStep = (step: any, data: any, sorted: Set<number>) => {
     if (!step) return;
 
-    // Handle array state updates (Merge Sort, etc.)
     if (step.variables?.array && Array.isArray(data)) {
         step.variables.array.forEach((val: number, idx: number) => {
           if (idx >= 0 && idx < data.length) {
@@ -162,6 +156,16 @@ export default function VisualizerScreen() {
   const currentEvent = currentStepIndex >= 0 ? steps[currentStepIndex] : null;
   const nextEvent = currentStepIndex < steps.length - 1 ? steps[currentStepIndex + 1] : null;
 
+  const renderVisualizer = () => {
+    if (algorithm.visualizationType === 'TREE') {
+      return <TreeVisualizer data={currentData} currentEvent={currentEvent} sortedIndices={sortedIndices} />;
+    }
+    if (algorithm.visualizationType === 'GRAPH') {
+      return <GraphVisualizer data={currentData} currentEvent={currentEvent} sortedIndices={sortedIndices} />;
+    }
+    return <ArrayVisualizer data={currentData} currentEvent={currentEvent} sortedIndices={sortedIndices} />;
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen
@@ -185,12 +189,14 @@ export default function VisualizerScreen() {
               >
                 <Sparkles color={colors.primary} size={18} />
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setShowCode(!showCode)}
-                style={styles.settingsBtn}
-              >
-                <Code color={showCode ? colors.primary : colors.textSecondary} size={18} />
-              </TouchableOpacity>
+              {!isDesktop && (
+                <TouchableOpacity
+                  onPress={() => setShowCode(!showCode)}
+                  style={styles.settingsBtn}
+                >
+                  <Code color={showCode ? colors.primary : colors.textSecondary} size={18} />
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 onPress={() => setIsPredictionMode(!isPredictionMode)}
                 style={[styles.settingsBtn, isPredictionMode && { opacity: 1 }]}
@@ -206,74 +212,59 @@ export default function VisualizerScreen() {
       />
 
       <ErrorBoundary>
-        <ScrollView contentContainerStyle={styles.content}>
-          {error ? (
-             <View style={styles.errorContainer}>
-               <ThemedText variant="h3" style={{ color: colors.error }}>{error}</ThemedText>
-               <Button title="Reset Visualization" onPress={reset} style={{ marginTop: Spacing.four }} />
-             </View>
-          ) : (
-            <>
-              <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '44' }]}>
+        <View style={[styles.mainLayout, isDesktop && styles.desktopLayout]}>
+          {/* Code Section */}
+          {(showCode || isDesktop) && (
+            <View style={[styles.codeSection, isDesktop && styles.desktopCodeSection]}>
+              <View style={styles.sectionHeader}>
+                 <ThemedText variant="subtitle">Algorithm Implementation</ThemedText>
+              </View>
+              <CodeViewer
+                code={algorithm.code}
+                activeLine={currentEvent?.codeLine}
+                isDesktop={isDesktop}
+              />
+              {currentEvent?.variables && (
+                <View style={styles.variablesPanel}>
+                  <ThemedText variant="caption" style={{ fontWeight: 'bold', marginBottom: 4 }}>Call Stack & Variables</ThemedText>
+                  <View style={styles.variablesGrid}>
+                    {Object.entries(currentEvent.variables).map(([key, val]) => {
+                      if (key === 'array') return null;
+                      return (
+                        <View key={key} style={[styles.variableBadge, { backgroundColor: colors.backgroundElement }]}>
+                          <ThemedText variant="caption" style={{ color: colors.primary }}>{key}</ThemedText>
+                          <ThemedText variant="caption" style={{ fontWeight: 'bold' }}>{JSON.stringify(val)}</ThemedText>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* Visualization Section */}
+          <View style={[styles.vizSection, isDesktop && styles.desktopVizSection]}>
+             <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '22' }]}>
                 {showPrediction && nextEvent ? (
                   <PredictionOverlay
                     nextEvent={nextEvent}
                     onCorrect={() => { setShowPrediction(false); nextStep(); }}
                     onIncorrect={() => { setShowPrediction(false); nextStep(); }}
                   />
-                ) : (
-                  <>
-                    {algorithm.visualizationType === 'TREE' ? (
-                      <TreeVisualizer
-                        data={currentData}
-                        currentEvent={currentEvent}
-                        sortedIndices={sortedIndices}
-                      />
-                    ) : algorithm.visualizationType === 'GRAPH' ? (
-                      <GraphVisualizer
-                        data={currentData}
-                        currentEvent={currentEvent}
-                        sortedIndices={sortedIndices}
-                      />
-                    ) : (
-                      <ArrayVisualizer
-                        data={currentData}
-                        currentEvent={currentEvent}
-                        sortedIndices={sortedIndices}
-                      />
-                    )}
-                  </>
-                )}
+                ) : renderVisualizer()}
               </View>
 
-              {!showPrediction && (
-                <View style={[styles.infoContainer, { backgroundColor: colors.backgroundElement + '22' }]}>
-                  <ThemedText variant="h3">{currentEvent?.description || 'Press Play to Start'}</ThemedText>
-
-                  {showCode && (
-                    <CodeViewer
-                      code={algorithm.code}
-                      activeLine={currentEvent?.codeLine}
-                    />
-                  )}
-
-                  {currentEvent?.variables && (
-                    <View style={styles.variables}>
-                      {Object.entries(currentEvent.variables).map(([key, val]) => {
-                        if (key === 'array') return null;
-                        return (
-                          <ThemedText key={key} variant="caption">
-                            {key}: {JSON.stringify(val)}
-                          </ThemedText>
-                        );
-                      })}
-                    </View>
-                  )}
+              <View style={styles.descriptionPanel}>
+                <View style={[styles.stepIndicator, { backgroundColor: colors.primary }]}>
+                  <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>STEP {currentStepIndex + 1}</ThemedText>
                 </View>
-              )}
-            </>
-          )}
-        </ScrollView>
+                <ThemedText variant="h3" style={styles.stepDescription}>
+                  {currentEvent?.description || 'Press Play to begin visualization'}
+                </ThemedText>
+              </View>
+          </View>
+        </View>
       </ErrorBoundary>
 
       <View style={[styles.controls, { borderTopColor: colors.backgroundElement }]}>
@@ -298,6 +289,96 @@ export default function VisualizerScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  mainLayout: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  desktopLayout: {
+    flexDirection: 'row',
+  },
+  codeSection: {
+    flex: 1,
+    padding: Spacing.four,
+    borderRightWidth: 1,
+    borderRightColor: '#eeeeee22',
+  },
+  desktopCodeSection: {
+    flex: 0.4,
+    height: '100%',
+  },
+  vizSection: {
+    flex: 1,
+    padding: Spacing.four,
+  },
+  desktopVizSection: {
+    flex: 0.6,
+  },
+  sectionHeader: {
+    marginBottom: Spacing.two,
+    paddingBottom: Spacing.two,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eeeeee22',
+  },
+  vizContainer: {
+    height: 320,
+    justifyContent: 'center',
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: Spacing.four,
+  },
+  descriptionPanel: {
+    padding: Spacing.four,
+    backgroundColor: '#3b82f611',
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#3b82f6',
+  },
+  stepIndicator: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginBottom: 8,
+  },
+  stepDescription: {
+    fontSize: 18,
+    lineHeight: 26,
+  },
+  variablesPanel: {
+    marginTop: Spacing.four,
+    padding: Spacing.two,
+    borderRadius: 8,
+    backgroundColor: '#00000011',
+  },
+  variablesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  variableBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 6,
+  },
+  controls: {
+    borderTopWidth: 1,
+    paddingBottom: Spacing.four,
+    backgroundColor: 'transparent',
+  },
+  settingsBtn: {
+    marginLeft: Spacing.two,
+    opacity: 0.8,
+  }
+});
+
 
 const styles = StyleSheet.create({
   container: {
