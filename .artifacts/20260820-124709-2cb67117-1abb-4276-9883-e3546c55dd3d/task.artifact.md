@@ -31,6 +31,10 @@
     - [x] Implement horizontal resizing for Code/AI columns
     - [x] Add vertical drag handles with Grip icons
     - [x] Add Web Mouse events for resizing
+- [x] Interaction & UX Fixes (Round 3)
+    - [x] Fix Home Screen category scroll arrows
+    - [x] Add 30px padding after Code Editor separator
+    - [x] Enable "Enter" key submission for AI Tutor
 - [x] Verify all fixes
     - [x] Run static analysis
-    - [x] Create walkthrough v10
+    - [x] Create walkthrough v11

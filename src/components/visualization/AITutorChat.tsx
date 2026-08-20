@@ -47,7 +47,6 @@ export function AITutorChat({ currentEvent, algorithmName, code, isEmbedded = fa
 
     try {
       const context = { algorithmName, code, currentEvent };
-      // Pass history including reasoning_details
       const responseMessage = await generateTutorResponse([...messages, newUserMessage], context);
       setMessages(prev => [...prev, responseMessage]);
     } catch (error) {
@@ -137,6 +136,8 @@ export function AITutorChat({ currentEvent, algorithmName, code, isEmbedded = fa
             placeholder="Ask a question..."
             containerStyle={{ flex: 1, marginVertical: 0 }}
             style={{ backgroundColor: colors.backgroundElement, borderWidth: 0, fontSize: 16 }}
+            onSubmitEditing={() => handleSend()} // Submit on Enter
+            returnKeyType="send"
           />
           <TouchableOpacity
               onPress={() => handleSend()}

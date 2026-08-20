@@ -233,7 +233,7 @@ export function CodeViewer({
                 fontFamily: FONT_MONO,
                 borderRightWidth: 1,
                 borderRightColor: theme.border,
-                marginRight: 20,
+                marginRight: 30, // 30 padding as requested
                 height: LINE_HEIGHT,
                 display: 'flex',
                 alignItems: 'center',

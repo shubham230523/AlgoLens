@@ -45,21 +45,24 @@ export default function HomeScreen() {
   const { width: windowWidth } = useWindowDimensions();
   const categoryScrollRef = useRef<ScrollView>(null);
 
-  // Scroll indicator logic for categories
-  const scrollX = useSharedValue(0);
+  // Use a ref to track the current scroll position synchronously
+  const scrollOffset = useRef(0);
   const [contentWidth, setContentWidth] = useState(1);
   const containerWidth = windowWidth - Spacing.four * 2;
 
   const scrollCategories = (direction: 'left' | 'right') => {
     if (categoryScrollRef.current) {
-        const offset = direction === 'left' ? -300 : 300;
+        const offset = direction === 'left' ? -400 : 400;
+        const newX = Math.max(0, Math.min(contentWidth - containerWidth, scrollOffset.current + offset));
         categoryScrollRef.current.scrollTo({
-            x: scrollX.value + offset,
+            x: newX,
             animated: true
         });
     }
   };
 
+  // Reanimated indicator logic
+  const scrollX = useSharedValue(0);
   const indicatorStyle = useAnimatedStyle(() => {
     const maxScroll = contentWidth - containerWidth;
     if (maxScroll <= 0) return { opacity: 0, transform: [{ translateX: 0 }] };
@@ -123,11 +126,14 @@ export default function HomeScreen() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.horizontalList}
                 onScroll={(e) => {
-                    scrollX.value = e.nativeEvent.contentOffset.x;
+                    const x = e.nativeEvent.contentOffset.x;
+                    scrollX.value = x;
+                    scrollOffset.current = x; // Update synchronous ref
                 }}
                 onContentSizeChange={(w) => setContentWidth(w)}
                 scrollEventThrottle={16}
                 decelerationRate="fast"
+                scrollEnabled={true}
             >
             {CATEGORIES.map((category, index) => {
                 const Icon = CATEGORY_ICONS[category] || BookOpen;
