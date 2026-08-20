@@ -264,7 +264,11 @@ export default function VisualizerScreen() {
         onClose={() => setIsInputModalVisible(false)}
         onSubmit={setInputData}
         initialValue={inputData}
-        type={algorithm.category === 'Searching' ? 'SEARCH' : (algorithm.category === 'Graphs' ? 'ARRAY' : 'ARRAY')}
+        type={
+          algorithm.category === 'Searching Algorithm' ? 'SEARCH' :
+          (algorithm.id === 'fibonacci-dp' || algorithm.id === 'n-queens' ? 'NUMBER' :
+          (algorithm.visualizationType === 'GRAPH' ? 'GRAPH' : 'ARRAY'))
+        }
       />
 
       <AITutorModal

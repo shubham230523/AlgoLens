@@ -19,9 +19,10 @@ function constructSystemPrompt(context: TutorContext): string {
 
   let eventContext = 'The algorithm has just started.';
   if (currentEvent) {
+    const indicesStr = Array.isArray(currentEvent.indices) ? currentEvent.indices.join(', ') : 'None';
     eventContext = `Currently, the algorithm is performing a ${currentEvent.type} operation.
 Description: ${currentEvent.description}
-Active Indices: ${currentEvent.indices?.join(', ') || 'None'}
+Active Indices: ${indicesStr}
 Variables State: ${JSON.stringify(currentEvent.variables || {})}`;
   }
 

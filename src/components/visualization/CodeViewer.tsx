@@ -20,28 +20,29 @@ interface CodeViewerProps {
   onReset?: () => void;
 }
 
-// IDE Themes
+// PREMIUM IDE THEMES
 const THEMES = {
   light: {
     background: '#ffffff',
-    headerBg: '#f7f8fa',
-    border: '#e5e7eb',
-    text: '#262626',
-    gutterText: '#bfbfbf',
-    highlight: '#f3f4f6',
-    accent: '#007aff',
-    comment: '#8c8c8c',
+    headerBg: '#f8fafc',
+    border: '#e2e8f0',
+    text: '#1e293b',
+    gutterText: '#94a3b8',
+    highlight: 'rgba(108, 99, 255, 0.08)',
+    accent: '#6366f1',
+    comment: '#64748b',
     syntax: prism,
   },
   dark: {
     background: '#0B1020',
     headerBg: '#151B2E',
     border: '#1E293B',
-    text: '#e3e3e3',
-    gutterText: '#5f6368',
-    highlight: 'rgba(108, 99, 255, 0.15)',
+    text: '#f1f5f9',
+    gutterText: '#475569',
+    // HIGH VISIBILITY NEON HIGHLIGHT for dark background
+    highlight: 'rgba(129, 140, 248, 0.25)',
     accent: '#818CF8',
-    comment: '#9aa0a6',
+    comment: '#64748b',
     syntax: atomDark,
   },
 };
@@ -49,13 +50,7 @@ const THEMES = {
 const FONT_MONO = Platform.select({
   ios: 'Menlo',
   android: 'monospace',
-  web: '"Google Sans Code", "Roboto Mono", monospace',
-});
-
-const FONT_SANS = Platform.select({
-  ios: 'System',
-  android: 'sans-serif',
-  web: '"Google Sans", "Product Sans", sans-serif',
+  web: '"JetBrains Mono", "Fira Code", "Roboto Mono", monospace',
 });
 
 export function CodeViewer({
@@ -73,14 +68,14 @@ export function CodeViewer({
   const horizontalScrollRef = useRef<ScrollView>(null);
 
   const LINE_HEIGHT = 24;
-  const PADDING_TOP = 16;
+  const PADDING_TOP = 20;
 
   const animatedHighlightStyle = useAnimatedStyle(() => {
     if (activeLine === undefined || activeLine < 1) return { opacity: 0 };
     return {
       opacity: 1,
       transform: [
-        { translateY: withSpring((activeLine - 1) * LINE_HEIGHT, { damping: 20, stiffness: 120 }) }
+        { translateY: withSpring((activeLine - 1) * LINE_HEIGHT, { damping: 20, stiffness: 150 }) }
       ]
     };
   });
@@ -89,14 +84,15 @@ export function CodeViewer({
     if (activeLine !== undefined && activeLine > 0 && verticalScrollRef.current) {
       const scrollPosition = (activeLine - 1) * LINE_HEIGHT;
       verticalScrollRef.current.scrollTo({
-        y: Math.max(0, scrollPosition - (isDesktop ? 150 : 80)),
+        y: Math.max(0, scrollPosition - (isDesktop ? 180 : 100)),
         animated: true,
       });
     }
   }, [activeLine, isDesktop]);
 
   const copyToClipboard = async () => {
-    await Clipboard.setStringAsync(code[selectedLanguage]);
+    const codeStr = code?.[selectedLanguage] || '';
+    await Clipboard.setStringAsync(codeStr);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -109,24 +105,22 @@ export function CodeViewer({
     { label: 'Kotlin', value: 'kotlin' },
   ];
 
-  const currentLangLabel = languages.find(l => l.value === selectedLanguage)?.label || 'Language';
+  const currentLangLabel = languages.find(l => l.value === selectedLanguage)?.label || 'JS';
+  const safeCode = code?.[selectedLanguage] || '// No code implementation available';
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, borderColor: theme.border }]}>
       <View style={[styles.header, { backgroundColor: theme.headerBg, borderBottomColor: theme.border }]}>
-        <TouchableOpacity style={styles.langSelector}>
+        <TouchableOpacity style={[styles.langSelector, { backgroundColor: scheme === 'dark' ? '#1E293B' : '#F1F5F9' }]}>
           <ThemedText variant="caption" style={[styles.langText, { color: theme.text }]}>
             {currentLangLabel}
           </ThemedText>
-          <ChevronDown size={14} color={theme.gutterText} />
+          <ChevronDown size={12} color={theme.gutterText} />
         </TouchableOpacity>
 
         <View style={styles.headerIcons}>
           <TouchableOpacity style={styles.iconBtn}>
             <Bookmark size={16} color={theme.gutterText} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconBtn}>
-            <Terminal size={16} color={theme.gutterText} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconBtn} onPress={onReset}>
             <RotateCcw size={16} color={theme.gutterText} />
@@ -154,9 +148,10 @@ export function CodeViewer({
           showsHorizontalScrollIndicator={true}
         >
           <View style={styles.codeWrapper}>
+            {/* NEON FULL WIDTH HIGHLIGHT */}
             <Animated.View style={[
               styles.floatingHighlight,
-              { backgroundColor: theme.highlight },
+              { backgroundColor: theme.highlight, borderLeftColor: theme.accent },
               animatedHighlightStyle
             ]} />
 
@@ -173,16 +168,16 @@ export function CodeViewer({
               fontSize={13}
               showLineNumbers={true}
               lineNumberStyle={{
-                minWidth: 35,
-                paddingRight: 10,
+                minWidth: 40,
+                paddingRight: 15,
                 color: theme.gutterText,
                 textAlign: 'right',
                 fontSize: 11,
                 backgroundColor: 'transparent',
                 fontFamily: FONT_MONO,
                 borderRightWidth: 1,
-                borderRightColor: theme.border + '44',
-                marginRight: 10,
+                borderRightColor: theme.border,
+                marginRight: 15,
               }}
               lineProps={() => ({
                 style: {
@@ -192,7 +187,7 @@ export function CodeViewer({
                 },
               })}
             >
-              {code[selectedLanguage]}
+              {safeCode}
             </SyntaxHighlighter>
           </View>
         </ScrollView>
@@ -203,7 +198,7 @@ export function CodeViewer({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 8,
+    borderRadius: 12,
     overflow: 'hidden',
     flex: 1,
     borderWidth: 1,
@@ -212,27 +207,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.three,
+    paddingHorizontal: Spacing.four,
     borderBottomWidth: 1,
-    height: 36,
+    height: 42,
   },
   langSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.03)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
   langText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   headerIcons: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
   },
   iconBtn: {
     padding: 4,
@@ -248,7 +242,7 @@ const styles = StyleSheet.create({
   },
   horizontalScrollContent: {
     minWidth: '100%',
-    paddingBottom: 24,
+    paddingBottom: 40,
   },
   codeWrapper: {
     position: 'relative',
@@ -256,9 +250,10 @@ const styles = StyleSheet.create({
   },
   floatingHighlight: {
     position: 'absolute',
-    left: -100, // Extend left to cover gutter area
-    width: 2000,
+    left: -100, // Covers gutter
+    width: 3000, // Safe huge width
     height: 24,
+    borderLeftWidth: 4,
     zIndex: -1,
   }
 });
