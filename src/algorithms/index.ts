@@ -9,6 +9,19 @@ import { bstSearch } from './trees/bstSearch';
 import { bfs } from './graphs/bfs';
 import { dfs } from './graphs/dfs';
 
+import { preorderTraversal, inorderTraversal, postorderTraversal } from './trees/treeTraversals';
+import { dijkstra } from './graphs/dijkstra';
+import { knapsack01 } from './dynamicProgramming/knapsack';
+import { fibonacciDP } from './dynamicProgramming/fibonacci';
+import { maxSumSubarray } from './slidingWindow/maxSumSubarray';
+import { pairSum } from './twoPointers/pairSum';
+import { nQueens } from './backtracking/nQueens';
+import { activitySelection } from './greedy/activitySelection';
+
+import { quickSort } from './sorting/quickSort';
+import { heapSort } from './sorting/heapSort';
+import { lcs } from './dynamicProgramming/lcs';
+
 export * from './learningPaths';
 
 export const ALL_ALGORITHMS: AlgorithmDefinition[] = [
@@ -16,24 +29,38 @@ export const ALL_ALGORITHMS: AlgorithmDefinition[] = [
   selectionSort,
   insertionSort,
   mergeSort,
+  quickSort,
+  heapSort,
   linearSearch,
   binarySearch,
   bstSearch,
+  preorderTraversal,
+  inorderTraversal,
+  postorderTraversal,
   bfs,
   dfs,
+  dijkstra,
+  knapsack01,
+  fibonacciDP,
+  lcs,
+  maxSumSubarray,
+  pairSum,
+  nQueens,
+  activitySelection,
 ];
 
 export const CATEGORIES = [
-  'Sorting',
-  'Searching',
-  'Arrays',
-  'Linked Lists',
-  'Stacks',
-  'Queues',
+  'Sorting Algorithm',
+  'Searching Algorithm',
   'Trees',
   'Graphs',
-  'Recursion',
   'Dynamic Programming',
+  'Backtracking',
+  'Greedy Algorithm',
+  'Sliding Window',
+  'Two Pointers',
+  'Stack / Monotonic Deque',
+  'Linked List',
 ];
 
 export const getAlgorithmById = (id: string) =>

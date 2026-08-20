@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import SyntaxHighlighter from 'react-native-syntax-highlighter';
 // @ts-ignore
-import { atomDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { atomDark, prism } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
-import { Copy, Check } from 'lucide-react-native';
+import { Copy, Check, Bookmark, RotateCcw, Maximize2, Terminal, ChevronDown } from 'lucide-react-native';
 import { ThemedText } from '../ui/ThemedText';
 import * as Clipboard from 'expo-clipboard';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
@@ -17,18 +17,33 @@ interface CodeViewerProps {
   isDesktop?: boolean;
   onLanguageChange?: (lang: SupportedLanguage) => void;
   selectedLanguage: SupportedLanguage;
+  onReset?: () => void;
 }
 
-// Premium Gemini Dark Theme Colors
-const GEMINI_DARK = {
-  background: '#131314',
-  headerBg: '#1e1f20',
-  border: '#3c4043',
-  text: '#e3e3e3',
-  comment: '#9aa0a6',
-  // HIGH VISIBILITY CONTRAST COLORS
-  highlight: 'rgba(108, 99, 255, 0.45)',
-  highlightBorder: '#A5B4FC', // Brighter Indigo
+// IDE Themes
+const THEMES = {
+  light: {
+    background: '#ffffff',
+    headerBg: '#f7f8fa',
+    border: '#e5e7eb',
+    text: '#262626',
+    gutterText: '#bfbfbf',
+    highlight: '#f3f4f6',
+    accent: '#007aff',
+    comment: '#8c8c8c',
+    syntax: prism,
+  },
+  dark: {
+    background: '#0B1020',
+    headerBg: '#151B2E',
+    border: '#1E293B',
+    text: '#e3e3e3',
+    gutterText: '#5f6368',
+    highlight: 'rgba(108, 99, 255, 0.15)',
+    accent: '#818CF8',
+    comment: '#9aa0a6',
+    syntax: atomDark,
+  },
 };
 
 const FONT_MONO = Platform.select({
@@ -48,23 +63,24 @@ export function CodeViewer({
   activeLine,
   isDesktop = false,
   onLanguageChange,
-  selectedLanguage
+  selectedLanguage,
+  onReset,
 }: CodeViewerProps) {
+  const scheme = useColorScheme() ?? 'light';
+  const theme = THEMES[scheme as keyof typeof THEMES];
   const [copied, setCopied] = useState(false);
   const verticalScrollRef = useRef<ScrollView>(null);
   const horizontalScrollRef = useRef<ScrollView>(null);
 
-  // Base constants for layout calculation
   const LINE_HEIGHT = 24;
-  const PADDING_TOP = 12;
+  const PADDING_TOP = 16;
 
   const animatedHighlightStyle = useAnimatedStyle(() => {
     if (activeLine === undefined || activeLine < 1) return { opacity: 0 };
-
     return {
       opacity: 1,
       transform: [
-        { translateY: withSpring((activeLine - 1) * LINE_HEIGHT, { damping: 20, stiffness: 100 }) }
+        { translateY: withSpring((activeLine - 1) * LINE_HEIGHT, { damping: 20, stiffness: 120 }) }
       ]
     };
   });
@@ -73,7 +89,7 @@ export function CodeViewer({
     if (activeLine !== undefined && activeLine > 0 && verticalScrollRef.current) {
       const scrollPosition = (activeLine - 1) * LINE_HEIGHT;
       verticalScrollRef.current.scrollTo({
-        y: Math.max(0, scrollPosition - (isDesktop ? 180 : 100)),
+        y: Math.max(0, scrollPosition - (isDesktop ? 150 : 80)),
         animated: true,
       });
     }
@@ -93,36 +109,35 @@ export function CodeViewer({
     { label: 'Kotlin', value: 'kotlin' },
   ];
 
-  return (
-    <View style={[styles.container, { backgroundColor: GEMINI_DARK.background, borderColor: GEMINI_DARK.border }]}>
-      <View style={[styles.header, { backgroundColor: GEMINI_DARK.headerBg, borderBottomColor: GEMINI_DARK.border }]}>
-        <View style={styles.langSelector}>
-          {languages.map((lang) => (
-            <TouchableOpacity
-              key={lang.value}
-              onPress={() => onLanguageChange?.(lang.value)}
-              style={[
-                styles.langBtn,
-                selectedLanguage === lang.value && { borderBottomColor: GEMINI_DARK.highlightBorder }
-              ]}
-            >
-              <ThemedText
-                variant="caption"
-                style={[
-                  styles.langText,
-                  { fontFamily: FONT_SANS },
-                  selectedLanguage === lang.value && { color: GEMINI_DARK.highlightBorder, fontWeight: 'bold' }
-                ]}
-              >
-                {lang.label}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </View>
+  const currentLangLabel = languages.find(l => l.value === selectedLanguage)?.label || 'Language';
 
-        <TouchableOpacity onPress={copyToClipboard} style={styles.copyBtn}>
-          {copied ? <Check size={16} color={GEMINI_DARK.highlightBorder} /> : <Copy size={16} color={GEMINI_DARK.comment} />}
+  return (
+    <View style={[styles.container, { backgroundColor: theme.background, borderColor: theme.border }]}>
+      <View style={[styles.header, { backgroundColor: theme.headerBg, borderBottomColor: theme.border }]}>
+        <TouchableOpacity style={styles.langSelector}>
+          <ThemedText variant="caption" style={[styles.langText, { color: theme.text }]}>
+            {currentLangLabel}
+          </ThemedText>
+          <ChevronDown size={14} color={theme.gutterText} />
         </TouchableOpacity>
+
+        <View style={styles.headerIcons}>
+          <TouchableOpacity style={styles.iconBtn}>
+            <Bookmark size={16} color={theme.gutterText} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconBtn}>
+            <Terminal size={16} color={theme.gutterText} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconBtn} onPress={onReset}>
+            <RotateCcw size={16} color={theme.gutterText} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconBtn} onPress={copyToClipboard}>
+            {copied ? <Check size={16} color={theme.accent} /> : <Copy size={16} color={theme.gutterText} />}
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconBtn}>
+            <Maximize2 size={16} color={theme.gutterText} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -139,12 +154,15 @@ export function CodeViewer({
           showsHorizontalScrollIndicator={true}
         >
           <View style={styles.codeWrapper}>
-            {/* FULL WIDTH HIGH VISIBILITY HIGHLIGHT */}
-            <Animated.View style={[styles.floatingHighlight, animatedHighlightStyle]} />
+            <Animated.View style={[
+              styles.floatingHighlight,
+              { backgroundColor: theme.highlight },
+              animatedHighlightStyle
+            ]} />
 
             <SyntaxHighlighter
               language={selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage}
-              style={atomDark}
+              style={theme.syntax}
               customStyle={{
                 backgroundColor: 'transparent',
                 padding: 0,
@@ -155,20 +173,22 @@ export function CodeViewer({
               fontSize={13}
               showLineNumbers={true}
               lineNumberStyle={{
-                minWidth: 40,
-                paddingRight: 15,
-                color: '#5f6368',
+                minWidth: 35,
+                paddingRight: 10,
+                color: theme.gutterText,
                 textAlign: 'right',
                 fontSize: 11,
                 backgroundColor: 'transparent',
                 fontFamily: FONT_MONO,
+                borderRightWidth: 1,
+                borderRightColor: theme.border + '44',
+                marginRight: 10,
               }}
               lineProps={() => ({
                 style: {
                   height: LINE_HEIGHT,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  paddingLeft: 4,
                 },
               })}
             >
@@ -183,7 +203,7 @@ export function CodeViewer({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 12,
+    borderRadius: 8,
     overflow: 'hidden',
     flex: 1,
     borderWidth: 1,
@@ -192,25 +212,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.three,
     borderBottomWidth: 1,
-    height: 48,
+    height: 36,
   },
   langSelector: {
     flexDirection: 'row',
-    gap: Spacing.four,
-  },
-  langBtn: {
-    paddingVertical: 12,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   langText: {
-    color: '#9aa0a6',
     fontSize: 12,
+    fontWeight: '500',
   },
-  copyBtn: {
-    padding: 8,
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconBtn: {
+    padding: 4,
   },
   verticalScrollView: {
     flex: 1,
@@ -231,12 +256,9 @@ const styles = StyleSheet.create({
   },
   floatingHighlight: {
     position: 'absolute',
-    left: 0,
-    width: 2000, // Ensure it covers the whole line horizontally
+    left: -100, // Extend left to cover gutter area
+    width: 2000,
     height: 24,
-    backgroundColor: GEMINI_DARK.highlight,
-    borderLeftWidth: 5,
-    borderLeftColor: GEMINI_DARK.highlightBorder,
     zIndex: -1,
   }
 });
