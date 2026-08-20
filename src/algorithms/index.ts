@@ -22,6 +22,11 @@ import { quickSort } from './sorting/quickSort';
 import { heapSort } from './sorting/heapSort';
 import { lcs } from './dynamicProgramming/lcs';
 
+import { topologicalSort } from './graphs/topologicalSort';
+import { lis } from './dynamicProgramming/lis';
+import { reverseLinkedList } from './linkedList/reverseLinkedList';
+import { slidingWindowMaximum } from './stack/slidingWindowMaximum';
+
 export * from './learningPaths';
 
 export const ALL_ALGORITHMS: AlgorithmDefinition[] = [
@@ -40,13 +45,17 @@ export const ALL_ALGORITHMS: AlgorithmDefinition[] = [
   bfs,
   dfs,
   dijkstra,
+  topologicalSort,
   knapsack01,
   fibonacciDP,
   lcs,
+  lis,
   maxSumSubarray,
   pairSum,
   nQueens,
   activitySelection,
+  reverseLinkedList,
+  slidingWindowMaximum,
 ];
 
 export const CATEGORIES = [
