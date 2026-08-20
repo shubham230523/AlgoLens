@@ -1,43 +1,33 @@
-# AI Integration and Code Editor Refinement
+# Resizable Columns in Visualizer
 
-This plan outlines the integration of the OpenRouter API with reasoning capabilities and the visual refinement of the Code Editor dimensions.
+This plan outlines the implementation of horizontal resizing for the three-column layout in the Visualizer screen.
 
 ## Proposed Changes
 
-### 1. OpenRouter AI Integration
-- Replace the mock AI service with real API calls to OpenRouter.
-- Implement the requested "reasoning" logic using `nvidia/nemotron-3.5-lightning:free`.
-- Maintain conversation history including `reasoning_details` to allow the model to continue its thought process.
-- Pass current algorithm context (name, code, visualization state) in the system prompt.
+### 1. Width Management
+- Introduce state or shared values to track the widths of the Code Section and AI Tutor Section.
+- Set minimum and maximum width constraints to maintain usability.
 
-#### [aiService.ts](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/lib/aiService.ts)
-- Define `API_KEY` and `BASE_URL`.
-- Update `ChatMessage` interface to optionally include `reasoning_details`.
-- Rewrite `generateTutorResponse` to perform a `fetch` to OpenRouter.
-- Ensure the system prompt is always prepended to the message list for context.
+### 2. Resizer Handles
+- Add two vertical resizer components (Handle 1 and Handle 2) between the columns.
+- Style the handles to be visible but subtle, with a `col-resize` cursor on web.
 
----
-
-### 2. Code Editor Refinement
-- Set a predefined width for the code editor that looks good on desktop.
-- Ensure no code wrapping occurs.
-- Enable horizontal scrolling only up to the end of the longest line.
+### 3. Gesture Logic
+- Implement drag functionality to update column widths in real-time.
+- Ensure the center Visualization section automatically takes up the remaining space.
 
 #### [[id].tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/app/visualizer/[id].tsx)
-- Update `desktopCodeSection` style to use a specific `width` or `flex` value that results in a fixed width (e.g., 400px or `flex: 0.3`).
-
-#### [CodeViewer.tsx](file:///C:/Users/shubham/Documents/ReactNative/AlgoLens/src/components/visualization/CodeViewer.tsx)
-- Double-check `wrapLines={false}` and `whiteSpace: 'pre'`.
-- Ensure the inner `ScrollView` correctly calculates its content size based on the `SyntaxHighlighter`.
+- Add `codeWidth` and `aiWidth` states.
+- Insert `Pressable` or `View` components with pan handlers between the main sections.
+- Update styles to use the dynamic width states.
 
 ## Verification Plan
 
 ### Automated Verification
-- `analyze_file` on `aiService.ts` to check for syntax and type errors.
-- Verify API request structure against OpenRouter documentation.
+- `analyze_file` on `VisualizerScreen` to check for syntax and type errors.
 
 ### Manual Verification
-- **AI Chat**: Send a message to the AI and verify it responds based on the current algorithm.
-- **Reasoning**: Check if the response feels "thoughtful" (as per the model's capabilities).
-- **Code Editor**: Verify the width is fixed and horizontal scrolling works correctly without wrapping lines.
-- **Scroll Limit**: Confirm you cannot scroll horizontally past the end of the longest code line.
+- **Resize Code Section**: Drag the left handle and verify the Code Editor expands/contracts correctly.
+- **Resize AI Section**: Drag the right handle and verify the AI Sidebar expands/contracts correctly.
+- **Center Section**: Verify the Visualization section adjusts its width to fill the gap.
+- **Constraints**: Ensure the columns don't shrink below a usable minimum size (e.g., 200px).

@@ -27,6 +27,10 @@
     - [x] Implement AI reasoning continuity (reasoning_details)
     - [x] Set fixed width for Code Editor (450px)
     - [x] Set fixed width for AI Sidebar (350px)
+- [x] Column Resizing and Polish
+    - [x] Implement horizontal resizing for Code/AI columns
+    - [x] Add vertical drag handles with Grip icons
+    - [x] Add Web Mouse events for resizing
 - [x] Verify all fixes
     - [x] Run static analysis
-    - [x] Create walkthrough v9
+    - [x] Create walkthrough v10

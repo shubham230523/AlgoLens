@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { View, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { View, StyleSheet, TouchableOpacity, useWindowDimensions, Platform } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -17,7 +17,7 @@ import { CodeViewer } from '@/components/visualization/CodeViewer';
 import { AITutorModal } from '@/components/visualization/AITutorModal';
 import { AITutorChat } from '@/components/visualization/AITutorChat';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Settings2, Brain, Heart, Sparkles, Info, MessageSquare } from 'lucide-react-native';
+import { Settings2, Brain, Heart, Sparkles, Info, MessageSquare, GripVertical } from 'lucide-react-native';
 import { SupportedLanguage } from '@/types/algorithm';
 
 export default function VisualizerScreen() {
@@ -26,6 +26,11 @@ export default function VisualizerScreen() {
   const colors = Colors[scheme];
   const { width: windowWidth } = useWindowDimensions();
   const isDesktop = windowWidth > 1100;
+
+  const [codeWidth, setCodeWidth] = useState(450);
+  const [aiWidth, setAiWidth] = useState(350);
+  const [isResizingCode, setIsResizingCode] = useState(false);
+  const [isResizingAi, setIsResizingAi] = useState(false);
 
   const {
     steps,
@@ -162,6 +167,38 @@ export default function VisualizerScreen() {
     { color: colors.sorted, label: 'Sorted/Found' },
   ];
 
+  // Resizing logic for Web
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isResizingCode) {
+        const newWidth = Math.max(250, Math.min(600, e.clientX - 20));
+        setCodeWidth(newWidth);
+      } else if (isResizingAi) {
+        const newWidth = Math.max(250, Math.min(500, window.innerWidth - e.clientX - 20));
+        setAiWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizingCode(false);
+      setIsResizingAi(false);
+      document.body.style.cursor = 'default';
+    };
+
+    if (isResizingCode || isResizingAi) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizingCode, isResizingAi]);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen
@@ -193,7 +230,8 @@ export default function VisualizerScreen() {
 
       <ErrorBoundary>
         <View style={[styles.mainLayout, isDesktop && styles.desktopLayout]}>
-          <View style={[styles.codeSection, isDesktop && styles.desktopCodeSection]}>
+          {/* Column 1: Code */}
+          <View style={[styles.codeSection, isDesktop && { width: codeWidth }]}>
             <CodeViewer
               code={algorithm.code}
               activeLine={currentEvent?.codeLine}
@@ -203,6 +241,18 @@ export default function VisualizerScreen() {
             />
           </View>
 
+          {/* Resizer Handle 1 */}
+          {isDesktop && (
+            <View
+              style={[styles.resizer, { backgroundColor: isResizingCode ? colors.primary : 'transparent' }]}
+              //@ts-ignore - Web only prop
+              onMouseDown={() => setIsResizingCode(true)}
+            >
+              <GripVertical size={16} color={colors.backgroundSelected} />
+            </View>
+          )}
+
+          {/* Column 2: Visualization */}
           <View style={[styles.rightSection, isDesktop && styles.desktopRightSection]}>
              <View style={styles.vizCanvas}>
                 <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '08' }]}>
@@ -264,8 +314,20 @@ export default function VisualizerScreen() {
              </View>
           </View>
 
+          {/* Resizer Handle 2 */}
           {isDesktop && showAIChat && (
-            <View style={styles.aiTutorSection}>
+            <View
+              style={[styles.resizer, { backgroundColor: isResizingAi ? colors.primary : 'transparent' }]}
+              //@ts-ignore - Web only prop
+              onMouseDown={() => setIsResizingAi(true)}
+            >
+               <GripVertical size={16} color={colors.backgroundSelected} />
+            </View>
+          )}
+
+          {/* Column 3: AI Chat */}
+          {isDesktop && showAIChat && (
+            <View style={[styles.aiTutorSection, { width: aiWidth }]}>
               <AITutorChat
                 currentEvent={currentEvent}
                 algorithmName={algorithm.name}
@@ -311,24 +373,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   codeSection: {
-    flex: 1,
     padding: Spacing.two,
-  },
-  desktopCodeSection: {
-    width: 450, // Predefinedwidth for code editor
     height: '100%',
   },
   rightSection: {
     flex: 1,
+    height: '100%',
   },
   desktopRightSection: {
     flex: 1,
-    height: '100%',
   },
   aiTutorSection: {
-    width: 350, // Predefined width for AI Tutor
     height: '100%',
     padding: Spacing.two,
+  },
+  resizer: {
+    width: 8,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    //@ts-ignore
+    cursor: 'col-resize',
   },
   vizCanvas: {
     flex: 2,
