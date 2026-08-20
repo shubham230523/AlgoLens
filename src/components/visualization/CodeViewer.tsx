@@ -8,6 +8,7 @@ import { useColorScheme } from 'react-native';
 import { Copy, Check } from 'lucide-react-native';
 import { ThemedText } from '../ui/ThemedText';
 import * as Clipboard from 'expo-clipboard';
+import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { SupportedLanguage } from '@/types/algorithm';
 
 interface CodeViewerProps {
@@ -25,8 +26,9 @@ const GEMINI_DARK = {
   border: '#3c4043',
   text: '#e3e3e3',
   comment: '#9aa0a6',
-  highlight: 'rgba(108, 99, 255, 0.4)', // Higher opacity
-  highlightBorder: '#818CF8', // Brighter indigo for better contrast
+  // HIGH VISIBILITY CONTRAST COLORS
+  highlight: 'rgba(108, 99, 255, 0.45)',
+  highlightBorder: '#A5B4FC', // Brighter Indigo
 };
 
 const FONT_MONO = Platform.select({
@@ -55,6 +57,17 @@ export function CodeViewer({
   // Base constants for layout calculation
   const LINE_HEIGHT = 24;
   const PADDING_TOP = 12;
+
+  const animatedHighlightStyle = useAnimatedStyle(() => {
+    if (activeLine === undefined || activeLine < 1) return { opacity: 0 };
+
+    return {
+      opacity: 1,
+      transform: [
+        { translateY: withSpring((activeLine - 1) * LINE_HEIGHT, { damping: 20, stiffness: 100 }) }
+      ]
+    };
+  });
 
   useEffect(() => {
     if (activeLine !== undefined && activeLine > 0 && verticalScrollRef.current) {
@@ -112,14 +125,12 @@ export function CodeViewer({
         </TouchableOpacity>
       </View>
 
-      {/* SINGLE VERTICAL SCROLLBAR */}
       <ScrollView
         ref={verticalScrollRef}
         style={styles.verticalScrollView}
         contentContainerStyle={styles.verticalScrollContent}
         showsVerticalScrollIndicator={true}
       >
-        {/* SINGLE HORIZONTAL SCROLLBAR */}
         <ScrollView
           ref={horizontalScrollRef}
           horizontal
@@ -128,7 +139,8 @@ export function CodeViewer({
           showsHorizontalScrollIndicator={true}
         >
           <View style={styles.codeWrapper}>
-            {/* Remove floatingHighlight as requested (remove chip) */}
+            {/* FULL WIDTH HIGH VISIBILITY HIGHLIGHT */}
+            <Animated.View style={[styles.floatingHighlight, animatedHighlightStyle]} />
 
             <SyntaxHighlighter
               language={selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage}
@@ -151,21 +163,14 @@ export function CodeViewer({
                 backgroundColor: 'transparent',
                 fontFamily: FONT_MONO,
               }}
-              lineProps={(lineNumber: number) => {
-                const isSelected = lineNumber === activeLine;
-                return {
-                  style: {
-                    height: LINE_HEIGHT,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingLeft: 4,
-                    width: '100%',
-                    backgroundColor: isSelected ? GEMINI_DARK.highlight : 'transparent',
-                    borderLeftWidth: isSelected ? 4 : 0,
-                    borderLeftColor: GEMINI_DARK.highlightBorder,
-                  },
-                };
-              }}
+              lineProps={() => ({
+                style: {
+                  height: LINE_HEIGHT,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingLeft: 4,
+                },
+              })}
             >
               {code[selectedLanguage]}
             </SyntaxHighlighter>
@@ -223,5 +228,15 @@ const styles = StyleSheet.create({
   codeWrapper: {
     position: 'relative',
     flex: 1,
+  },
+  floatingHighlight: {
+    position: 'absolute',
+    left: 0,
+    width: 2000, // Ensure it covers the whole line horizontally
+    height: 24,
+    backgroundColor: GEMINI_DARK.highlight,
+    borderLeftWidth: 5,
+    borderLeftColor: GEMINI_DARK.highlightBorder,
+    zIndex: -1,
   }
 });

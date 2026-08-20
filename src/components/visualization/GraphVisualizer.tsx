@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import Animated, { useAnimatedProps, withSpring, useReducedMotion } from 'react-native-reanimated';
+import Animated, { useAnimatedProps, withSpring, useReducedMotion, withTiming } from 'react-native-reanimated';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { VisualizationEvent } from '@/types/algorithm';
@@ -22,7 +22,7 @@ const MemoizedNode = React.memo(({ x, y, label, color, isHighlighted, textColor 
 
   const animatedCircleProps = useAnimatedProps(() => {
     return {
-      fill: shouldReduceMotion ? color : withSpring(color),
+      fill: shouldReduceMotion ? color : withTiming(color, { duration: 300 }),
       r: shouldReduceMotion ? (isHighlighted ? 22 : 20) : withSpring(isHighlighted ? 22 : 20),
     };
   }, [color, isHighlighted, shouldReduceMotion]);
@@ -85,25 +85,28 @@ export function GraphVisualizer({ data, currentEvent, sortedIndices }: GraphVisu
   const width = Math.min(windowWidth - Spacing.eight, 500);
   const height = 400;
 
+  const safeNodes = data?.nodes || [];
+  const safeEdges = data?.edges || [];
+
   // Simple circle layout if positions aren't provided
   const nodesWithPos = useMemo(() => {
     const centerX = width / 2;
     const centerY = height / 2;
     const radius = Math.min(width, height) / 2 - 40;
 
-    return data.nodes.map((node, i) => {
-      const angle = (i / data.nodes.length) * 2 * Math.PI;
+    return safeNodes.map((node, i) => {
+      const angle = (i / safeNodes.length) * 2 * Math.PI;
       return {
         ...node,
         x: node.x ?? centerX + radius * Math.cos(angle),
         y: node.y ?? centerY + radius * Math.sin(angle),
       };
     });
-  }, [data.nodes, width]);
+  }, [safeNodes, width]);
 
   const getElementColor = (index: number) => {
     if (sortedIndices.has(index)) return colors.sorted;
-    if (currentEvent?.indices.includes(index)) {
+    if (currentEvent?.indices?.includes(index)) {
       if (currentEvent.type === 'COMPARE') return colors.compare;
       if (currentEvent.type === 'SELECT') return colors.primary;
       return colors.active;
@@ -114,17 +117,17 @@ export function GraphVisualizer({ data, currentEvent, sortedIndices }: GraphVisu
   return (
     <View style={styles.container}>
       <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-        {data.edges.map((edge, i) => {
+        {safeEdges.map((edge, i) => {
           const fromNode = nodesWithPos.find(n => n.id === edge.from);
           const toNode = nodesWithPos.find(n => n.id === edge.to);
           if (!fromNode || !toNode) return null;
 
-          const fromIdx = data.nodes.findIndex(n => n.id === edge.from);
-          const toIdx = data.nodes.findIndex(n => n.id === edge.to);
+          const fromIdx = safeNodes.findIndex(n => n.id === edge.from);
+          const toIdx = safeNodes.findIndex(n => n.id === edge.to);
 
           const isActive = currentEvent?.type === 'COMPARE' &&
-                          currentEvent.indices.includes(fromIdx) &&
-                          currentEvent.indices.includes(toIdx);
+                          currentEvent.indices?.includes(fromIdx) &&
+                          currentEvent.indices?.includes(toIdx);
 
           return (
             <MemoizedEdge
@@ -140,7 +143,7 @@ export function GraphVisualizer({ data, currentEvent, sortedIndices }: GraphVisu
         })}
 
         {nodesWithPos.map((node, i) => {
-          const isHighlighted = currentEvent?.indices.includes(i);
+          const isHighlighted = currentEvent?.indices?.includes(i);
           const color = getElementColor(i);
 
           return (

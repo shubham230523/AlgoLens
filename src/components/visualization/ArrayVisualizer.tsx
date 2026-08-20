@@ -21,15 +21,14 @@ interface BarProps {
 
 const MemoizedBar = React.memo(({ value, index, color, width, maxVal, isFaded, isMerging, label, speed }: BarProps) => {
   const shouldReduceMotion = useReducedMotion();
-  const animDuration = (1 / speed) * 300; // Base duration 300ms, scales with speed
+  const animDuration = (1 / speed) * 300;
 
-  // Static base height calculation
   const staticHeight = Math.max(20, (value / maxVal) * 150);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
       backgroundColor: shouldReduceMotion ? color : withTiming(color, { duration: animDuration }),
-      height: shouldReduceMotion ? staticHeight : withTiming(staticHeight, { duration: animDuration }), // Use timing for smoother height transitions
+      height: shouldReduceMotion ? staticHeight : withTiming(staticHeight, { duration: animDuration }),
       opacity: withTiming(isFaded ? 0.2 : 1, { duration: animDuration }),
       transform: [
         { translateY: withTiming(isMerging ? -30 : 0, { duration: animDuration }) }
@@ -77,13 +76,12 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
   const safeData = Array.isArray(data) ? data : [];
   const maxVal = useMemo(() => safeData.length > 0 ? Math.max(...safeData, 1) : 1, [safeData]);
 
-  // Adjust scaling for new layout
   const availableWidth = Math.min(windowWidth * 0.5, 800);
   const barWidth = safeData.length > 0 ? Math.max(20, Math.min(60, (availableWidth / safeData.length) - 8)) : 40;
 
   const getElementColor = (index: number) => {
     if (sortedIndices.has(index)) return colors.sorted;
-    if (currentEvent?.indices.includes(index)) {
+    if (currentEvent?.indices?.includes(index)) {
       if (currentEvent.type === 'COMPARE') return colors.compare;
       if (currentEvent.type === 'SWAP' || currentEvent.type === 'MERGE_STEP' || currentEvent.type === 'UPDATE_VALUE') return colors.swap;
       if (currentEvent.type === 'HIGHLIGHT' || currentEvent.type === 'SUBARRAY_FOCUS') return colors.primary;
@@ -103,12 +101,18 @@ export function ArrayVisualizer({ data, currentEvent, sortedIndices }: ArrayVisu
     return labels.length > 0 ? labels.join(', ') : undefined;
   };
 
+  const accessibilityLabel = useMemo(() => {
+    const values = safeData.join(', ');
+    const eventDesc = currentEvent ? `. Current step: ${currentEvent.description}` : '';
+    return `Algorithm visualization array with ${safeData.length} elements: ${values}${eventDesc}`;
+  }, [safeData, currentEvent]);
+
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessibilityRole="image" accessibilityLabel={accessibilityLabel}>
       <View style={styles.arrayRow}>
         {safeData.map((value, index) => {
-          const isFaded = !!(currentEvent?.type === 'SUBARRAY_FOCUS' && !currentEvent.indices.includes(index));
-          const isMerging = !!(currentEvent?.type === 'MERGE_STEP' && currentEvent.indices.includes(index));
+          const isFaded = !!(currentEvent?.type === 'SUBARRAY_FOCUS' && !currentEvent.indices?.includes(index));
+          const isMerging = !!(currentEvent?.type === 'MERGE_STEP' && currentEvent.indices?.includes(index));
 
           return (
             <MemoizedBar
