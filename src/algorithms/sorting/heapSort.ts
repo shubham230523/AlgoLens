@@ -10,43 +10,53 @@ export const heapSort: AlgorithmDefinition = {
   visualizationType: 'BAR',
   defaultInput: [12, 11, 13, 5, 6, 7],
   code: {
-    cpp: `void heapSort(int arr[], int n) {
-    for (int i = n / 2 - 1; i >= 0; i--)
-        heapify(arr, n, i);
-    for (int i = n - 1; i > 0; i--) {
-        swap(arr[0], arr[i]);
-        heapify(arr, i, 0);
+    cpp: `class Solution {
+public:
+    void heapSort(int arr[], int n) {
+        for (int i = n / 2 - 1; i >= 0; i--)
+            heapify(arr, n, i);
+        for (int i = n - 1; i > 0; i--) {
+            swap(arr[0], arr[i]);
+            heapify(arr, i, 0);
+        }
+    }
+};`,
+    java: `class Solution {
+    public void sort(int arr[]) {
+        int n = arr.length;
+        for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);
+        for (int i = n - 1; i > 0; i--) {
+            int temp = arr[0]; arr[0] = arr[i]; arr[i] = temp;
+            heapify(arr, i, 0);
+        }
     }
 }`,
-    java: `void sort(int arr[]) {
-    int n = arr.length;
-    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);
-    for (int i = n - 1; i > 0; i--) {
-        int temp = arr[0]; arr[0] = arr[i]; arr[i] = temp;
-        heapify(arr, i, 0);
+    python: `class Solution:
+    def heapSort(self, arr):
+        n = len(arr)
+        for i in range(n // 2 - 1, -1, -1):
+            heapify(arr, n, i)
+        for i in range(n - 1, 0, -1):
+            arr[i], arr[0] = arr[0], arr[i]
+            heapify(arr, i, 0)`,
+    javascript: `class Solution {
+    heapSort(arr) {
+        let n = arr.length;
+        for (let i = Math.floor(n / 2) - 1; i >= 0; i--) heapify(arr, n, i);
+        for (let i = n - 1; i > 0; i--) {
+            [arr[0], arr[i]] = [arr[i], arr[0]];
+            heapify(arr, i, 0);
+        }
     }
 }`,
-    python: `def heapSort(arr):
-    n = len(arr)
-    for i in range(n // 2 - 1, -1, -1):
-        heapify(arr, n, i)
-    for i in range(n - 1, 0, -1):
-        arr[i], arr[0] = arr[0], arr[i]
-        heapify(arr, i, 0)`,
-    javascript: `function heapSort(arr) {
-    let n = arr.length;
-    for (let i = Math.floor(n / 2) - 1; i >= 0; i--) heapify(arr, n, i);
-    for (let i = n - 1; i > 0; i--) {
-        [arr[0], arr[i]] = [arr[i], arr[0]];
-        heapify(arr, i, 0);
-    }
-}`,
-    kotlin: `fun heapSort(arr: IntArray) {
-    val n = arr.size
-    for (i in n / 2 - 1 downTo 0) heapify(arr, n, i)
-    for (i in n - 1 downTo 1) {
-        val temp = arr[0]; arr[0] = arr[i]; arr[i] = temp
-        heapify(arr, i, 0)
+    kotlin: `class Solution {
+    fun heapSort(arr: IntArray) {
+        val n = arr.size
+        for (i in n / 2 - 1 downTo 0) heapify(arr, n, i)
+        for (i in n - 1 downTo 1) {
+            val temp = arr[0]; arr[0] = arr[i]; arr[i] = temp
+            heapify(arr, i, 0)
+        }
     }
 }`
   },

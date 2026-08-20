@@ -91,7 +91,7 @@ export function TreeVisualizer({ data, currentEvent, sortedIndices }: TreeVisual
   const colors = Colors[scheme];
   const { width: windowWidth } = useWindowDimensions();
 
-  const width = Math.min(windowWidth - Spacing.eight, 500);
+  const width = Math.max(100, Math.min(windowWidth - (Spacing.eight || 48), 500)) || 300;
   const height = 300;
   const levelHeight = 60;
 

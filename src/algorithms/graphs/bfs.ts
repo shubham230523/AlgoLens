@@ -24,68 +24,82 @@ export const bfs: AlgorithmDefinition = {
     startNode: '0',
   },
   code: {
-    cpp: `void BFS(int s) {
-    vector<bool> visited(V, false);
-    queue<int> q;
-    visited[s] = true;
-    q.push(s);
-    while(!q.empty()) {
-        s = q.front(); q.pop();
-        for(auto i : adj[s]) {
-            if(!visited[i]) {
-                visited[i] = true;
-                q.push(i);
+    cpp: `class Solution {
+public:
+    void BFS(int V, vector<int> adj[], int s) {
+        vector<bool> visited(V, false);
+        queue<int> q;
+        visited[s] = true;
+        q.push(s);
+        while(!q.empty()) {
+            int curr = q.front(); q.pop();
+            for(auto neighbor : adj[curr]) {
+                if(!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    q.push(neighbor);
+                }
+            }
+        }
+    }
+};`,
+    java: `class Solution {
+    public void BFS(int V, LinkedList<Integer> adj[], int s) {
+        boolean visited[] = new boolean[V];
+        LinkedList<Integer> queue = new LinkedList<Integer>();
+        visited[s] = true;
+        queue.add(s);
+        while (queue.size() != 0) {
+            int curr = queue.poll();
+            for (int neighbor : adj[curr]) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    queue.add(neighbor);
+                }
             }
         }
     }
 }`,
-    java: `void BFS(int s) {
-    boolean visited[] = new boolean[V];
-    LinkedList<Integer> queue = new LinkedList<Integer>();
-    visited[s]=true; queue.add(s);
-    while (queue.size() != 0) {
-        s = queue.poll();
-        for (int n : adj[s]) {
-            if (!visited[n]) {
-                visited[n] = true;
-                queue.add(n);
+    python: `class Solution:
+    def BFS(self, V, adj, s):
+        visited = [False] * V
+        queue = []
+        queue.append(s)
+        visited[s] = True
+        while queue:
+            curr = queue.pop(0)
+            for neighbor in adj[curr]:
+                if not visited[neighbor]:
+                    queue.append(neighbor)
+                    visited[neighbor] = True`,
+    javascript: `class Solution {
+    BFS(V, adj, startNode) {
+        let queue = [startNode];
+        let visited = new Array(V).fill(false);
+        visited[startNode] = true;
+        while (queue.length > 0) {
+            let curr = queue.shift();
+            for (let neighbor of adj[curr]) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    queue.push(neighbor);
+                }
             }
         }
     }
 }`,
-    python: `def BFS(s):
-    visited = [False] * (max(adj) + 1)
-    queue = []
-    queue.append(s)
-    visited[s] = True
-    while queue:
-        s = queue.pop(0)
-        for i in adj[s]:
-            if visited[i] == False:
-                queue.append(i)
-                visited[i] = True`,
-    javascript: `function BFS(startNode) {
-    let queue = [startNode];
-    let visited = new Set([startNode]);
-    while (queue.length > 0) {
-        let node = queue.shift();
-        for (let neighbor of node.neighbors) {
-            if (!visited.has(neighbor)) {
-                visited.add(neighbor);
-                queue.push(neighbor);
-            }
-        }
-    }
-}`,
-    kotlin: `fun BFS(s: Int) {
-    val visited = BooleanArray(V)
-    val queue = LinkedList<Int>()
-    visited[s] = true; queue.add(s)
-    while (queue.isNotEmpty()) {
-        val curr = queue.poll()
-        adj[curr].forEach {
-            if (!visited[it]) {
-                visited[it] = true; queue.add(it)
+    kotlin: `class Solution {
+    fun BFS(V: Int, adj: Array<LinkedList<Int>>, s: Int) {
+        val visited = BooleanArray(V)
+        val queue = LinkedList<Int>()
+        visited[s] = true
+        queue.add(s)
+        while (queue.isNotEmpty()) {
+            val curr = queue.poll()
+            adj[curr].forEach { neighbor ->
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true
+                    queue.add(neighbor)
+                }
             }
         }
     }

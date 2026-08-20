@@ -45,13 +45,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <Heart color={color} size={size} />,
         }}
       />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color, size }) => <Settings color={color} size={size} />,
-        }}
-      />
     </Tabs>
   );
 }

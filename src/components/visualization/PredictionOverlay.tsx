@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { ThemedText } from '../ui/ThemedText';
@@ -24,8 +24,8 @@ export function PredictionOverlay({ nextEvent, onCorrect, onIncorrect }: Predict
     const correct = nextEvent.type;
     const all = ['COMPARE', 'SWAP', 'VISIT', 'MARK_SORTED'];
     const filtered = all.filter(t => t !== correct);
-    const shuffeled = [...filtered].sort(() => 0.5 - Math.random()).slice(0, 2);
-    return [...shuffeled, correct].sort(() => 0.5 - Math.random());
+    const shuffled = [...filtered].sort(() => 0.5 - Math.random()).slice(0, 2);
+    return [...shuffled, correct].sort(() => 0.5 - Math.random());
   }, [nextEvent]);
 
   const handleChoice = (choice: string) => {
@@ -103,5 +103,3 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   }
 });
-
-import { useMemo } from 'react';

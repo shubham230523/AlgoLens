@@ -1,0 +1,32 @@
+# Task Management
+
+- [x] Researching React Error #130
+    - [x] Explore project structure
+    - [x] Identify recent changes or problematic imports
+    - [x] Reproduce the error locally (if possible)
+- [x] Develop Implementation Plan
+- [x] UI Polish and Refinements
+    - [x] Fix SyntaxHighlighter boolean attribute warning
+    - [x] Add Left/Right scroll arrows to Category list
+    - [x] Redesign Featured Algorithm cards (Home)
+    - [x] Increase CodeViewer font size by 30% and add spacing
+    - [x] Remove Settings tab
+    - [x] Wrap and Expand Heap Sort (5 languages)
+- [x] Interaction Fixes (Round 2)
+    - [x] Fix Category scroll arrow logic
+    - [x] Implement functional Language Dropdown
+    - [x] Increase Line Number padding (CodeViewer)
+    - [x] Eliminate "horizontal" attribute console warning
+- [x] Code Editor Layout and Formatting
+    - [x] Force horizontal scroll (disable wrap)
+    - [x] Align line numbers with code
+    - [x] Fix initial indentation
+    - [x] Enable horizontal scroll indicators
+- [x] AI Integration and Final Refinements
+    - [x] Integrate OpenRouter API (NVIDIA Nemotron)
+    - [x] Implement AI reasoning continuity (reasoning_details)
+    - [x] Set fixed width for Code Editor (450px)
+    - [x] Set fixed width for AI Sidebar (350px)
+- [x] Verify all fixes
+    - [x] Run static analysis
+    - [x] Create walkthrough v9

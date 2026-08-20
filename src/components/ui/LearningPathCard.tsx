@@ -17,7 +17,9 @@ export function LearningPathCard({ path, onPress }: LearningPathCardProps) {
   const colors = Colors[scheme];
   const { isCompleted } = useProgressStore();
 
-  const IconComponent = (Icons as any)[path.icon.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('')] || Icons.BookOpen;
+  // Robust icon resolution
+  const iconName = path.icon.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+  const IconComponent = (Icons as any)[iconName] || Icons.BookOpen || Icons.HelpCircle;
 
   const completedCount = path.algorithmIds.filter(id => isCompleted(id)).length;
   const progress = path.algorithmIds.length > 0 ? completedCount / path.algorithmIds.length : 0;
@@ -30,7 +32,12 @@ export function LearningPathCard({ path, onPress }: LearningPathCardProps) {
     >
       <View style={styles.header}>
         <View style={[styles.iconContainer, { backgroundColor: colors.primary + '22' }]}>
-          <IconComponent color={colors.primary} size={24} />
+          {/* Ensure IconComponent is a valid function/class before rendering */}
+          {typeof IconComponent === 'function' || typeof IconComponent === 'object' ? (
+            <IconComponent color={colors.primary} size={24} />
+          ) : (
+            <View style={{ width: 24, height: 24, backgroundColor: colors.primary + '44', borderRadius: 12 }} />
+          )}
         </View>
         <View style={[styles.difficultyBadge, { backgroundColor: colors.backgroundSelected }]}>
           <ThemedText variant="caption" style={{ color: colors.textSecondary }}>{path.difficulty}</ThemedText>

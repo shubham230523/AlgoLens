@@ -15,8 +15,9 @@ import { CustomInputModal } from '@/components/visualization/CustomInputModal';
 import { PredictionOverlay } from '@/components/visualization/PredictionOverlay';
 import { CodeViewer } from '@/components/visualization/CodeViewer';
 import { AITutorModal } from '@/components/visualization/AITutorModal';
+import { AITutorChat } from '@/components/visualization/AITutorChat';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Settings2, Brain, Heart, Sparkles, Info } from 'lucide-react-native';
+import { Settings2, Brain, Heart, Sparkles, Info, MessageSquare } from 'lucide-react-native';
 import { SupportedLanguage } from '@/types/algorithm';
 
 export default function VisualizerScreen() {
@@ -24,7 +25,7 @@ export default function VisualizerScreen() {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const { width: windowWidth } = useWindowDimensions();
-  const isDesktop = windowWidth > 900;
+  const isDesktop = windowWidth > 1100;
 
   const {
     steps,
@@ -48,6 +49,7 @@ export default function VisualizerScreen() {
   const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>('cpp');
   const [isAITutorVisible, setIsAITutorVisible] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
+  const [showAIChat, setShowAIChat] = useState(true);
 
   const initialData = useMemo(() => {
     if (typeof inputData === 'object' && 'array' in inputData) {
@@ -170,7 +172,12 @@ export default function VisualizerScreen() {
                <TouchableOpacity onPress={() => toggleFavorite(algorithm.id)} style={styles.headerBtn}>
                 <Heart color={isFavorite(algorithm.id) ? colors.error : colors.textSecondary} fill={isFavorite(algorithm.id) ? colors.error : 'transparent'} size={18} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsAITutorVisible(true)} style={styles.headerBtn}>
+              {isDesktop && (
+                <TouchableOpacity onPress={() => setShowAIChat(!showAIChat)} style={styles.headerBtn}>
+                  <MessageSquare color={showAIChat ? colors.primary : colors.textSecondary} size={18} />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity onPress={() => setIsAITutorVisible(true)} style={[styles.headerBtn, isDesktop && { display: 'none' }]}>
                 <Sparkles color={colors.primary} size={18} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setIsPredictionMode(!isPredictionMode)} style={[styles.headerBtn, isPredictionMode && { opacity: 1 }]}>
@@ -219,7 +226,7 @@ export default function VisualizerScreen() {
                         {legendItems.map((item, idx) => (
                           <View key={idx} style={styles.legendItem}>
                             <View style={[styles.colorBox, { backgroundColor: item.color }]} />
-                            <ThemedText variant="caption">{item.label}</ThemedText>
+                            <ThemedText variant="caption" style={{ fontSize: 13 }}>{item.label}</ThemedText>
                           </View>
                         ))}
                      </View>
@@ -236,8 +243,8 @@ export default function VisualizerScreen() {
                           if (key === 'array') return null;
                           return (
                             <View key={key} style={[styles.variableBadge, { backgroundColor: colors.backgroundElement }]}>
-                              <ThemedText variant="caption" style={{ color: colors.primary, fontWeight: 'bold' }}>{key}:</ThemedText>
-                              <ThemedText variant="caption">{JSON.stringify(val)}</ThemedText>
+                              <ThemedText variant="caption" style={{ color: colors.primary, fontWeight: 'bold', fontSize: 13 }}>{key}:</ThemedText>
+                              <ThemedText variant="caption" style={{ fontSize: 13 }}>{JSON.stringify(val)}</ThemedText>
                             </View>
                           );
                         })}
@@ -256,6 +263,17 @@ export default function VisualizerScreen() {
                 </View>
              </View>
           </View>
+
+          {isDesktop && showAIChat && (
+            <View style={styles.aiTutorSection}>
+              <AITutorChat
+                currentEvent={currentEvent}
+                algorithmName={algorithm.name}
+                code={algorithm.code[selectedLanguage]}
+                isEmbedded={true}
+              />
+            </View>
+          )}
         </View>
       </ErrorBoundary>
 
@@ -297,15 +315,20 @@ const styles = StyleSheet.create({
     padding: Spacing.two,
   },
   desktopCodeSection: {
-    flex: 0.4,
+    width: 450, // Predefinedwidth for code editor
     height: '100%',
   },
   rightSection: {
     flex: 1,
   },
   desktopRightSection: {
-    flex: 0.6,
+    flex: 1,
     height: '100%',
+  },
+  aiTutorSection: {
+    width: 350, // Predefined width for AI Tutor
+    height: '100%',
+    padding: Spacing.two,
   },
   vizCanvas: {
     flex: 2,
@@ -361,28 +384,29 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
   stepDescription: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '500',
-    lineHeight: 28,
+    lineHeight: 34,
   },
   variablesPanel: {
-    marginBottom: Spacing.two,
+    marginBottom: Spacing.three,
   },
   variablesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 12,
   },
   variableBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    gap: 8,
   },
   controlsSection: {
     marginTop: 'auto',
+    paddingTop: Spacing.two,
   },
   headerBtn: {
     marginLeft: Spacing.three,

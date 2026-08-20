@@ -13,56 +13,66 @@ export const binarySearch: AlgorithmDefinition = {
   visualizationType: 'BAR',
   defaultInput: { array: [10, 20, 30, 40, 50, 60, 70, 80, 90], target: 70 },
   code: {
-    cpp: `int binarySearch(int arr[], int n, int target) {
-    int low = 0, high = n - 1;
+    cpp: `class Solution {
+public:
+    int binarySearch(int arr[], int n, int target) {
+        int low = 0, high = n - 1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (arr[mid] == target) return mid;
+            if (arr[mid] < target) low = mid + 1;
+            else high = mid - 1;
+        }
+        return -1;
+    }
+};`,
+    java: `class Solution {
+    public int binarySearch(int[] arr, int target) {
+        int low = 0, high = arr.length - 1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (arr[mid] == target) return mid;
+            if (arr[mid] < target) low = mid + 1;
+            else high = mid - 1;
+        }
+        return -1;
+    }
+}`,
+    python: `class Solution:
+    def binary_search(self, arr, target):
+        low, high = 0, len(arr) - 1
+        while low <= high:
+            mid = (low + high) // 2
+            if arr[mid] == target:
+                return mid
+            if arr[mid] < target:
+                low = mid + 1
+            else:
+                high = mid - 1
+        return -1`,
+    javascript: `class Solution {
+  binarySearch(arr, target) {
+    let low = 0, high = arr.length - 1;
     while (low <= high) {
-        int mid = low + (high - low) / 2;
-        if (arr[mid] == target) return mid;
-        if (arr[mid] < target) low = mid + 1;
-        else high = mid - 1;
+      const mid = Math.floor((low + high) / 2);
+      if (arr[mid] === target) return mid;
+      if (arr[mid] < target) low = mid + 1;
+      else high = mid - 1;
     }
     return -1;
-}`,
-    java: `public int binarySearch(int[] arr, int target) {
-    int low = 0, high = arr.length - 1;
-    while (low <= high) {
-        int mid = low + (high - low) / 2;
-        if (arr[mid] == target) return mid;
-        if (arr[mid] < target) low = mid + 1;
-        else high = mid - 1;
-    }
-    return -1;
-}`,
-    python: `def binary_search(arr, target):
-    low, high = 0, len(arr) - 1
-    while low <= high:
-        mid = (low + high) // 2
-        if arr[mid] == target:
-            return mid
-        if arr[mid] < target:
-            low = mid + 1
-        else:
-            high = mid - 1
-    return -1`,
-    javascript: `function binarySearch(arr, target) {
-  let low = 0, high = arr.length - 1;
-  while (low <= high) {
-    const mid = Math.floor((low + high) / 2);
-    if (arr[mid] === target) return mid;
-    if (arr[mid] < target) low = mid + 1;
-    else high = mid - 1;
   }
-  return -1;
 }`,
-    kotlin: `fun binarySearch(arr: IntArray, target: Int): Int {
-    var low = 0; var high = arr.size - 1
-    while (low <= high) {
-        val mid = low + (high - low) / 2
-        if (arr[mid] == target) return mid
-        if (arr[mid] < target) low = mid + 1
-        else high = mid - 1
+    kotlin: `class Solution {
+    fun binarySearch(arr: IntArray, target: Int): Int {
+        var low = 0; var high = arr.size - 1
+        while (low <= high) {
+            val mid = low + (high - low) / 2
+            if (arr[mid] == target) return mid
+            if (arr[mid] < target) low = mid + 1
+            else high = mid - 1
+        }
+        return -1
     }
-    return -1
 }`
   },
   generateSteps: (input: { array: number[], target: number }): VisualizationEvent[] => {

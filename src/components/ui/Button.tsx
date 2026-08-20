@@ -5,7 +5,7 @@ import { useColorScheme } from 'react-native';
 
 interface ButtonProps {
   onPress: () => void;
-  title: string;
+  title?: string;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
@@ -14,6 +14,7 @@ interface ButtonProps {
   textStyle?: TextStyle;
   accessibilityLabel?: string;
   accessibilityHint?: string;
+  children?: React.ReactNode;
 }
 
 export function Button({
@@ -27,6 +28,7 @@ export function Button({
   textStyle,
   accessibilityLabel,
   accessibilityHint,
+  children,
 }: ButtonProps) {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
@@ -77,15 +79,20 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={variant === 'outline' || variant === 'ghost' ? colors.primary : '#FFF'} />
       ) : (
-        <Text
-          style={[
-            styles.text,
-            { color: variant === 'outline' || variant === 'ghost' ? colors.primary : '#FFF' },
-            textStyle,
-          ]}
-        >
-          {title}
-        </Text>
+        <>
+          {children}
+          {title && (
+            <Text
+              style={[
+                styles.text,
+                { color: variant === 'outline' || variant === 'ghost' ? colors.primary : '#FFF' },
+                textStyle,
+              ]}
+            >
+              {title}
+            </Text>
+          )}
+        </>
       )}
     </TouchableOpacity>
   );

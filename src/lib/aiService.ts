@@ -1,8 +1,12 @@
 import { VisualizationEvent } from '@/types/algorithm';
 
+const OPENROUTER_API_KEY = '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';
+const BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
+  reasoning_details?: any; // Preserved for reasoning continuity
 }
 
 export interface TutorContext {
@@ -22,7 +26,7 @@ function constructSystemPrompt(context: TutorContext): string {
     const indicesStr = Array.isArray(currentEvent.indices) ? currentEvent.indices.join(', ') : 'None';
     eventContext = `Currently, the algorithm is performing a ${currentEvent.type} operation.
 Description: ${currentEvent.description}
-Active Indices: ${indicesStr}
+Active Indices: [${indicesStr}]
 Variables State: ${JSON.stringify(currentEvent.variables || {})}`;
   }
 
@@ -31,7 +35,7 @@ Your goal is to help users understand algorithms through interactive visualizati
 
 Algorithm: ${algorithmName}
 Implementation Code:
-\`\`\`javascript
+\`\`\`
 ${code}
 \`\`\`
 
@@ -41,52 +45,60 @@ ${eventContext}
 Guidelines:
 1. Be concise and pedagogical.
 2. Explain the "Why" behind the current step, not just the "What".
-3. Use simple analogies when helpful.
-4. If the user asks about something unrelated to the algorithm, politely bring them back to the topic.
-5. You can use markdown for formatting (bold, italics, small code snippets).
+3. Use Markdown for formatting.
+4. If the user asks something unrelated, bring them back to the algorithm.
 `;
 }
 
 /**
- * Mock LLM call that simulates a thoughtful response.
- * In production, this would call OpenAI, Gemini, or a backend proxy.
+ * Call OpenRouter API with reasoning enabled.
  */
 export async function generateTutorResponse(
   messages: ChatMessage[],
   context: TutorContext
-): Promise<string> {
-  // Simulate network check
-  // In a real app, use NetInfo to check connectivity
-  const isOffline = false; // Mock offline check
-
-  if (isOffline) {
-    return "It looks like you're offline. I can provide basic algorithm info, but deep AI explanations require a connection. How else can I help with the visual steps?";
-  }
-
+): Promise<ChatMessage> {
   const systemPrompt = constructSystemPrompt(context);
 
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  // Prepare messages: system prompt + history
+  const fullMessages = [
+    { role: 'system', content: systemPrompt },
+    ...messages
+  ];
 
-  const lastUserMessage = messages[messages.length - 1].content.toLowerCase();
-  const { currentEvent, algorithmName } = context;
+  try {
+    const response = await fetch(BASE_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://algolens.app", // Optional
+        "X-Title": "AlgoLens", // Optional
+      },
+      body: JSON.stringify({
+        "model": "nvidia/nemotron-3.5-lightning:free",
+        "messages": fullMessages,
+        "reasoning": {"enabled": true}
+      })
+    });
 
-  // Intelligent mock responses based on common questions
-  if (lastUserMessage.includes('why') || lastUserMessage.includes('explain')) {
-    if (currentEvent?.type === 'COMPARE') {
-      return `We are comparing these values to decide if they are in the correct order. In **${algorithmName}**, this comparison is the core logic that determines if a swap or a move is necessary to satisfy the algorithm's goal.`;
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('OpenRouter API Error:', errorData);
+        throw new Error('Failed to fetch from AI service');
     }
-    if (currentEvent?.type === 'SWAP') {
-      return `A swap occurs here because the elements were out of order. By swapping them, we are moving the larger (or smaller) element closer to its final sorted position.`;
-    }
-    return `This step is part of the **${algorithmName}** logic. ${currentEvent?.description}. It ensures that we are making progress towards the final result while maintaining the algorithm's invariants.`;
-  }
 
-  if (lastUserMessage.includes('complexity') || lastUserMessage.includes('big o')) {
-    return `The time complexity of this algorithm is often a key point. For **${algorithmName}**, you'll notice how the number of operations grows as the input size increases. Would you like to discuss the specific Big O notation for this case?`;
-  }
+    const result = await response.json();
+    const assistantMessage = result.choices[0].message;
 
-  return `That's a great question! Looking at the current state where we just ${currentEvent?.description || 'started'}, what part of the logic seems most confusing to you? I can explain the code or the visual steps.`;
+    return {
+      role: 'assistant',
+      content: assistantMessage.content,
+      reasoning_details: assistantMessage.reasoning_details // Pass back for next call
+    };
+  } catch (error) {
+    console.error('generateTutorResponse Error:', error);
+    throw error;
+  }
 }
 
 export function getSuggestedQuestions(context: TutorContext): string[] {
