@@ -35,7 +35,7 @@
       ]
     ],
     "experiments": {
-      "baseUrl": "/AlgoLens-",
+      "baseUrl": "/AlgoLens",
       "typedRoutes": true,
       "reactCompiler": true
     }
