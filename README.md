@@ -19,10 +19,8 @@
 | Favorites | AI Tutor | Algorithm Visualization |
 | :---: | :---: | :---: |
 | ![Favorites](./screenshots/favorites_screen.jpg) | ![AI Tutor](./screenshots/ai_tutor.jpg) | ![Visualization](./screenshots/algorithm_visualization_screen.jpg) |
-
-| Visualization Running |
-| :---: |
-| <img src="./screenshots/algorithm_visualization_running.jpg" width="400" height="400" /> |
+| **Visualization Running** | | |
+| ![Running](./screenshots/algorithm_visualization_running.jpg) | | |
 
 ## ✨ Core Pillars
 
