@@ -8,7 +8,7 @@
 
 > [!IMPORTANT]
 > **Status: Under Active Development** 🛠️
-> This project is currently in development mode. Some Features are being refined, and we are constantly adding new algorithms and visual enhancements. This is not a production-ready project. It is a React Native application developed using AI-assisted vibe coding with Gemini in Android Studio. The project is intended primarily as a demonstration/prototype rather than a production-grade application.
+> This project is currently in development mode. Some features are being refined, and we are constantly adding new algorithms and visual enhancements. This is not a production-ready project. It is a React Native application developed using AI-assisted vibe coding with Gemini in Android Studio. The project is intended primarily as a demonstration/prototype rather than a production-grade application.
 
 ## 📸 Screenshots
 
