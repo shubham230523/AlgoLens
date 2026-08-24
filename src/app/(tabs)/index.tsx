@@ -80,14 +80,14 @@ export default function HomeScreen() {
             {CATEGORIES.map((category, index) => {
                 const Icon = CATEGORY_ICONS[category] || BookOpen;
                 const cols = getColumns(2, 3, 4);
-                // Explicitly set width to nearly half for 2 columns to force side-by-side
-                const itemWidth = cols === 2 ? '48%' : cols === 3 ? '31%' : '23%';
+                // Adjusted widths to work with flex-start and gap
+                const itemWidth = cols === 2 ? '47.5%' : cols === 3 ? '31%' : '23.5%';
 
                 return (
                 <Animated.View key={category} entering={FadeInDown.delay(index * 50)} style={{ width: itemWidth as any }}>
                     <TouchableOpacity
                     activeOpacity={0.8}
-                    style={[styles.categoryCard, { backgroundColor: colors.backgroundElement }]}
+                    style={[styles.categoryCard, { backgroundColor: colors.backgroundElement, height: isPhone ? 110 : 140 }]}
                     onPress={() => router.push({ pathname: '/explore', params: { category } })}
                     >
                     <View style={[styles.categoryIcon, { backgroundColor: colors.primary + '10' }]}>
@@ -205,8 +205,8 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: Spacing.three,
+    gap: Spacing.three,
+    justifyContent: 'flex-start',
   },
   horizontalList: {
     gap: Spacing.three,
@@ -219,7 +219,6 @@ const styles = StyleSheet.create({
   },
   categoryCard: {
     width: '100%',
-    height: 110,
     padding: Spacing.three,
     borderRadius: 24,
     alignItems: 'flex-start',

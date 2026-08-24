@@ -54,24 +54,13 @@ export const useProgressStore = create<ProgressState>()(
       storage: createJSONStorage(() => {
         if (Platform.OS === 'web') return window.localStorage;
 
-        const memoryStorage: any = {
-          getItem: (name: string) => null,
-          setItem: (name: string, value: string) => {},
-          removeItem: (name: string) => {},
-        };
-
-        try {
-          // Robustly check for AsyncStorage
-          const RNAS = require('@react-native-async-storage/async-storage');
-          const storage = RNAS.default || RNAS;
-          if (storage && typeof storage.getItem === 'function') {
-            return storage;
-          }
-        } catch (e) {
-          console.warn('AsyncStorage unavailable, falling back to memory');
-        }
-
-        return memoryStorage;
+        // Use a persistent memory object to avoid Native Module crashes
+        const memoryCache = new Map<string, string>();
+        return {
+          getItem: (name: string) => memoryCache.get(name) || null,
+          setItem: (name: string, value: string) => { memoryCache.set(name, value); },
+          removeItem: (name: string) => { memoryCache.delete(name); },
+        } as any;
       }),
     }
   )

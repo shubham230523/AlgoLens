@@ -38,6 +38,7 @@ export type SupportedLanguage = 'cpp' | 'java' | 'python' | 'javascript' | 'kotl
 export interface AlgorithmDefinition extends AlgorithmMetadata {
   generateSteps: (input: any) => VisualizationEvent[];
   defaultInput: any;
+  getInitialData?: (input: any) => any;
   visualizationType: 'ARRAY' | 'BAR' | 'LINKED_LIST' | 'TREE' | 'GRAPH' | 'RECURSION';
   code: Record<SupportedLanguage, string>;
 }

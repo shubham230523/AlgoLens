@@ -9,6 +9,7 @@ export const fibonacciDP: AlgorithmDefinition = {
   complexities: { time: 'O(n)', space: 'O(n)' },
   visualizationType: 'BAR',
   defaultInput: 10,
+  getInitialData: (n: number) => new Array(n + 1).fill(0),
   code: {
     cpp: `int fib(int n) {
     if (n <= 1) return n;

@@ -9,6 +9,7 @@ export const lcs: AlgorithmDefinition = {
   complexities: { time: 'O(m*n)', space: 'O(m*n)' },
   visualizationType: 'BAR', // Will visualize as two arrays or a progress of matching
   defaultInput: { text1: 'abcde', text2: 'ace' },
+  getInitialData: (input: { text1: string, text2: string }) => new Array(input.text2.length + 1).fill(0),
   code: {
     cpp: `int lcs(string s1, string s2) {
     int m = s1.size(), n = s2.size();
@@ -66,8 +67,8 @@ export const lcs: AlgorithmDefinition = {
       for (let j = 1; j <= n; j++) {
         steps.push({
           type: 'COMPARE',
-          indices: [i - 1, j - 1], // Mapping to chars in strings
-          description: `Comparing '${text1[i - 1]}' and '${text2[j - 1]}'`,
+          indices: [j], // We highlight the current DP index
+          description: `Comparing '${text1[i - 1]}' (s1[${i-1}]) and '${text2[j - 1]}' (s2[${j-1}])`,
           codeLine: 5,
           variables: { i, j, char1: text1[i-1], char2: text2[j-1] }
         });
@@ -75,20 +76,20 @@ export const lcs: AlgorithmDefinition = {
         if (text1[i - 1] === text2[j - 1]) {
           dp[i][j] = 1 + dp[i - 1][j - 1];
           steps.push({
-            type: 'SELECT',
-            indices: [i - 1, j - 1],
-            description: `Match! LCS length becomes ${dp[i][j]}`,
+            type: 'UPDATE_VALUE',
+            indices: [j],
+            description: `Match! dp[${i}][${j}] = 1 + dp[${i-1}][${j-1}] = ${dp[i][j]}`,
             codeLine: 5,
-            variables: { lcs: dp[i][j] }
+            variables: { lcs: dp[i][j], array: [...dp[i]] }
           });
         } else {
           dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
           steps.push({
-            type: 'VISIT',
-            indices: [i - 1, j - 1],
-            description: `No match. Taking max(dp[i-1][j], dp[i][j-1]) = ${dp[i][j]}`,
+            type: 'UPDATE_VALUE',
+            indices: [j],
+            description: `No match. dp[${i}][${j}] = max(dp[${i-1}][${j}], dp[${i}][${j-1}]) = ${dp[i][j]}`,
             codeLine: 6,
-            variables: { lcs: dp[i][j] }
+            variables: { lcs: dp[i][j], array: [...dp[i]] }
           });
         }
       }

@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   speedSection: {
     flexDirection: 'row',
     gap: 4,
-    width: 120, // Reduced width
+    width: 100,
   },
   speedBtn: {
     paddingHorizontal: 4,
@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
+    paddingLeft: 30, // Increased shift to the right
   },
   iconBtn: {
     padding: Spacing.half,

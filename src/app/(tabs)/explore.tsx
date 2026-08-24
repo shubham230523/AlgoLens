@@ -57,7 +57,10 @@ export default function ExploreScreen() {
           ) : null
         }
         renderItem={({ item }) => (
-          <View style={{ flex: 1 }}>
+          <View style={[
+            { flex: 1, paddingBottom: Spacing.two },
+            numColumns > 1 && { maxWidth: `${100 / numColumns}%` } // Prevents stretching in last row
+          ]}>
             <AlgorithmCard
                 algorithm={item}
                 onPress={() => router.push(`/visualizer/${item.id}`)}

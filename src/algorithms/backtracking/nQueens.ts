@@ -9,6 +9,7 @@ export const nQueens: AlgorithmDefinition = {
   complexities: { time: 'O(N!)', space: 'O(N)' },
   visualizationType: 'BAR', // Board will be visualized as a flat array for now, simplified
   defaultInput: 4,
+  getInitialData: (n: number) => new Array(n * n).fill(0),
   code: {
     cpp: `bool solve(int col) {
     if (col >= N) return true;
@@ -81,28 +82,29 @@ export const nQueens: AlgorithmDefinition = {
           indices: [],
           description: `All ${n} queens placed successfully!`,
           codeLine: 2,
-          variables: { col }
+          variables: { col, array: board.flat() }
         });
         return true;
       }
 
       for (let i = 0; i < n; i++) {
+        const flatIdx = i * n + col;
         steps.push({
           type: 'COMPARE',
-          indices: [col * n + i],
+          indices: [flatIdx],
           description: `Checking if row ${i}, col ${col} is safe`,
           codeLine: 4,
-          variables: { row: i, col }
+          variables: { row: i, col, array: board.flat() }
         });
 
         if (isSafe(i, col)) {
           board[i][col] = 1;
           steps.push({
             type: 'SELECT',
-            indices: [col * n + i],
+            indices: [flatIdx],
             description: `Placed queen at (${i}, ${col})`,
             codeLine: 5,
-            variables: { row: i, col }
+            variables: { row: i, col, array: board.flat() }
           });
 
           if (solve(col + 1)) return true;
@@ -110,10 +112,10 @@ export const nQueens: AlgorithmDefinition = {
           board[i][col] = 0;
           steps.push({
             type: 'VISIT',
-            indices: [col * n + i],
+            indices: [flatIdx],
             description: `Backtracking from (${i}, ${col})`,
             codeLine: 7,
-            variables: { row: i, col }
+            variables: { row: i, col, array: board.flat() }
           });
         }
       }

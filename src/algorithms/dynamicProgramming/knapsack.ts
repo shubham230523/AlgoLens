@@ -9,6 +9,7 @@ export const knapsack01: AlgorithmDefinition = {
   complexities: { time: 'O(N*W)', space: 'O(N*W)' },
   visualizationType: 'BAR', // Using BAR to show weights/values, though DP usually uses a table
   defaultInput: { weights: [1, 2, 3], values: [10, 15, 40], capacity: 6 },
+  getInitialData: (input: { weights: number[], values: number[], capacity: number }) => new Array(input.capacity + 1).fill(0),
   code: {
     cpp: `int knapsack(int W, int wt[], int val[], int n) {
     int dp[n + 1][W + 1];
@@ -75,27 +76,34 @@ export const knapsack01: AlgorithmDefinition = {
     for (let i = 1; i <= n; i++) {
       steps.push({
         type: 'HIGHLIGHT',
-        indices: [i - 1],
+        indices: [],
         description: `Processing item ${i} (Weight: ${weights[i - 1]}, Value: ${values[i - 1]})`,
         codeLine: 4,
-        variables: { item: i, weight: weights[i - 1], value: values[i - 1] }
+        variables: { item: i, weight: weights[i - 1], value: values[i - 1], array: [...dp[i-1]] }
       });
 
-      for (let w = 0; w <= capacity; w++) {
+      for (let w = 1; w <= capacity; w++) {
         if (weights[i - 1] <= w) {
           const include = values[i - 1] + dp[i - 1][w - weights[i - 1]];
           const exclude = dp[i - 1][w];
           dp[i][w] = Math.max(include, exclude);
 
           steps.push({
-            type: 'COMPARE',
-            indices: [i - 1],
+            type: 'UPDATE_VALUE',
+            indices: [w],
             description: `At capacity ${w}: Max(Include: ${include}, Exclude: ${exclude}) = ${dp[i][w]}`,
             codeLine: 6,
-            variables: { currentCapacity: w, include, exclude, result: dp[i][w] }
+            variables: { currentCapacity: w, include, exclude, result: dp[i][w], array: [...dp[i]] }
           });
         } else {
           dp[i][w] = dp[i - 1][w];
+          steps.push({
+            type: 'VISIT',
+            indices: [w],
+            description: `At capacity ${w}: Weight ${weights[i-1]} too large. Carrying forward ${dp[i][w]}`,
+            codeLine: 7,
+            variables: { currentCapacity: w, result: dp[i][w], array: [...dp[i]] }
+          });
         }
       }
     }

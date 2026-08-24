@@ -32,7 +32,9 @@ export function AlgorithmCard({ algorithm, onPress }: AlgorithmCardProps) {
     >
       <View style={styles.content}>
         <View style={styles.header}>
-          <ThemedText variant="h3" style={styles.title}>{algorithm.name}</ThemedText>
+          <View style={{ flex: 1, marginRight: Spacing.two }}>
+            <ThemedText variant="h3" style={styles.title} numberOfLines={2}>{algorithm.name}</ThemedText>
+          </View>
           <View style={[styles.badge, { backgroundColor: difficultyColor + '15' }]}>
             <ThemedText variant="caption" style={{ color: difficultyColor, fontWeight: '700', fontSize: 13 }}>
               {algorithm.difficulty}
@@ -70,6 +72,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2,
     flex: 1,
+    minHeight: 180, // Ensure uniform look
   },
   content: {
     gap: Spacing.two,
@@ -80,8 +83,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
+    lineHeight: 26,
   },
   badge: {
     paddingHorizontal: 12,

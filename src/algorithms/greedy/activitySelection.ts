@@ -12,6 +12,7 @@ export const activitySelection: AlgorithmDefinition = {
     start: [1, 3, 0, 5, 8, 5],
     finish: [2, 4, 6, 7, 9, 9]
   },
+  getInitialData: (input: { start: number[], finish: number[] }) => [...input.finish],
   code: {
     cpp: `void selectActivities(int s[], int f[], int n) {
     int i = 0;
@@ -74,7 +75,7 @@ export const activitySelection: AlgorithmDefinition = {
       indices: [],
       description: 'Sorting activities by finish time (Greedy choice)',
       codeLine: 1,
-      variables: { n }
+      variables: { n, array: [...finish] }
     });
 
     let i = 0;
@@ -83,7 +84,7 @@ export const activitySelection: AlgorithmDefinition = {
       indices: [0],
       description: `Selecting first activity (Finish: ${finish[0]})`,
       codeLine: 3,
-      variables: { lastSelected: 0 }
+      variables: { lastSelected: 0, array: [...finish] }
     });
 
     for (let j = 1; j < n; j++) {
@@ -92,7 +93,7 @@ export const activitySelection: AlgorithmDefinition = {
         indices: [i, j],
         description: `Checking if activity ${j} (Start: ${start[j]}) starts after activity ${i} (Finish: ${finish[i]}) ends`,
         codeLine: 5,
-        variables: { current: j, lastSelected: i }
+        variables: { current: j, lastSelected: i, array: [...finish] }
       });
 
       if (start[j] >= finish[i]) {
@@ -102,7 +103,7 @@ export const activitySelection: AlgorithmDefinition = {
           indices: [j],
           description: `Activity ${j} is compatible. Adding to selection.`,
           codeLine: 7,
-          variables: { lastSelected: i }
+          variables: { lastSelected: i, array: [...finish] }
         });
       } else {
         steps.push({
@@ -110,7 +111,7 @@ export const activitySelection: AlgorithmDefinition = {
           indices: [j],
           description: `Activity ${j} overlaps. Skipping.`,
           codeLine: 5,
-          variables: { lastSelected: i }
+          variables: { lastSelected: i, array: [...finish] }
         });
       }
     }
@@ -120,7 +121,7 @@ export const activitySelection: AlgorithmDefinition = {
       indices: [],
       description: 'Greedy selection complete!',
       codeLine: 1,
-      variables: {}
+      variables: { array: [...finish] }
     });
 
     return steps;

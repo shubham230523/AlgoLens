@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, useWindowDimensions, Platform } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Spacing, BottomTabInset } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { usePlaybackStore } from '@/store/playbackStore';
 import { useProgressStore } from '@/store/progressStore';
@@ -57,6 +57,9 @@ export default function VisualizerScreen() {
   const [showAIChat, setShowAIChat] = useState(true);
 
   const initialData = useMemo(() => {
+    if (algorithm.getInitialData) {
+      return algorithm.getInitialData(inputData);
+    }
     if (typeof inputData === 'object' && 'array' in inputData) {
       return inputData.array;
     }
@@ -64,7 +67,7 @@ export default function VisualizerScreen() {
         return inputData.tree;
     }
     return inputData;
-  }, [inputData]);
+  }, [inputData, algorithm]);
 
   const [currentData, setCurrentData] = useState<any>(initialData);
   const [sortedIndices, setSortedIndices] = useState<Set<number>>(new Set());
@@ -235,7 +238,7 @@ export default function VisualizerScreen() {
             styles.codeSection,
             isDesktop && { width: codeWidth },
             isTablet && { width: '40%' },
-            isPhone && { height: 260, minHeight: 260 }
+            isPhone && { height: 290, minHeight: 290 }
           ]}>
             <CodeViewer
               code={algorithm.code}
@@ -259,7 +262,7 @@ export default function VisualizerScreen() {
 
           {/* Column 2: Visualization */}
           <View style={[styles.rightSection, (isDesktop || isTablet) && styles.desktopRightSection]}>
-             <View style={[styles.vizCanvas, { minHeight: isPhone ? 180 : 400 }]}>
+             <View style={[styles.vizCanvas, { flex: isPhone ? 1 : 3, height: isPhone ? 'auto' : 'auto', minHeight: isPhone ? 230 : 400 }]}>
                 <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '08' }]}>
                   {showPrediction && nextEvent ? (
                     <PredictionOverlay
@@ -270,7 +273,7 @@ export default function VisualizerScreen() {
                   ) : renderVisualizer()}
                 </View>
 
-                {/* Color Legend in UI */}
+                {/* Color Legend in UI - Moved to top-right */}
                 <View style={styles.legendContainer}>
                    <TouchableOpacity onPress={() => setShowLegend(!showLegend)} style={styles.legendToggle}>
                       <Info size={16} color={colors.textSecondary} />
@@ -289,8 +292,8 @@ export default function VisualizerScreen() {
                 </View>
              </View>
 
-             <View style={[styles.bottomSection, isPhone && { flex: 1.5, borderTopWidth: 0 }]}>
-                <View style={[styles.metadataPanel, isPhone && { paddingHorizontal: Spacing.four, paddingTop: Spacing.one }]}>
+             <View style={[styles.bottomSection, isPhone && { flex: 0, borderTopWidth: 0, justifyContent: 'flex-end', paddingBottom: Spacing.four + (BottomTabInset ? BottomTabInset - 60 : 0) }]}>
+                <View style={[styles.metadataPanel, isPhone && { flex: 0, paddingHorizontal: Spacing.four, paddingTop: Spacing.one }]}>
                   {currentEvent?.variables && (
                     <View style={styles.variablesPanel}>
                       <View style={styles.variablesGrid}>
@@ -306,18 +309,20 @@ export default function VisualizerScreen() {
                       </View>
                     </View>
                   )}
-                  <View style={styles.descriptionRow}>
-                    <ThemedText
-                      variant="h3"
-                      style={[styles.stepDescription, isPhone && { fontSize: 18, lineHeight: 24 }]}
-                      numberOfLines={2}
-                    >
-                      {currentEvent?.description || 'Press Play to begin'}
-                    </ThemedText>
-                  </View>
+                  {currentStepIndex >= 0 && (
+                    <View style={styles.descriptionRow}>
+                      <ThemedText
+                        variant="h3"
+                        style={[styles.stepDescription, isPhone && { fontSize: 16, lineHeight: 22 }]}
+                        numberOfLines={2}
+                      >
+                        {currentEvent?.description}
+                      </ThemedText>
+                    </View>
+                  )}
                 </View>
 
-                <View style={styles.controlsSection}>
+                <View style={[styles.controlsSection, isPhone && { marginTop: Spacing.two }]}>
                   <PlaybackControls />
                 </View>
              </View>
@@ -386,13 +391,10 @@ const styles = StyleSheet.create({
   },
   codeSection: {
     padding: Spacing.two,
-    height: Platform.OS === 'web' ? '100%' : 'auto',
-    minHeight: 300,
     backgroundColor: 'rgba(0,0,0,0.02)',
   },
   rightSection: {
     flex: 1,
-    height: '100%',
   },
   desktopRightSection: {
     flex: 1,
@@ -422,9 +424,10 @@ const styles = StyleSheet.create({
   },
   legendContainer: {
     position: 'absolute',
-    bottom: Spacing.six,
-    right: Spacing.six,
+    top: Spacing.two,
+    right: Spacing.two,
     alignItems: 'flex-end',
+    zIndex: 100,
   },
   legendToggle: {
     flexDirection: 'row',
