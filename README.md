@@ -12,9 +12,9 @@
 
 ## 📸 Screenshots
 
-| Home Screen | Categories | Explore Screen |
+| Categories | Learning Paths | Explore Screen |
 | :---: | :---: | :---: |
-| ![Home Screen](./screenshots/home_screen_1.jpg) | ![Categories](./screenshots/home_screen_2.jpg) | ![Explore Screen](./screenshots/explore_screen.jpg) |
+| ![Categories](./screenshots/home_screen_2.jpg) | ![Learning Paths](./screenshots/home_screen_1.jpg) | ![Explore Screen](./screenshots/explore_screen.jpg) |
 
 | Favorites | AI Tutor | Algorithm Visualization |
 | :---: | :---: | :---: |
@@ -22,7 +22,7 @@
 
 | Visualization Running |
 | :---: |
-| ![Running](./screenshots/algorithm_visualization_running.jpg) |
+| <img src="./screenshots/algorithm_visualization_running.jpg" width="400" height="400" /> |
 
 ## ✨ Core Pillars
 
