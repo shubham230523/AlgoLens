@@ -12,6 +12,9 @@ jobs:
   build:
     name: Build Android APK
     runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g"
+      GRADLE_OPTS: "-Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError' -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,6 +30,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Install dependencies
         run: npm install
