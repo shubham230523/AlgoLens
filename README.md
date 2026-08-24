@@ -16,11 +16,9 @@
 | :---: | :---: | :---: |
 | ![Categories](./screenshots/home_screen_2.jpg) | ![Learning Paths](./screenshots/home_screen_1.jpg) | ![Explore Screen](./screenshots/explore_screen.jpg) |
 
-| Favorites | AI Tutor | Algorithm Visualization |
+| Favorites | AI Tutor | Visualization |
 | :---: | :---: | :---: |
-| ![Favorites](./screenshots/favorites_screen.jpg) | ![AI Tutor](./screenshots/ai_tutor.jpg) | ![Visualization](./screenshots/algorithm_visualization_screen.jpg) |
-| **Visualization Running** | | |
-| ![Running](./screenshots/algorithm_visualization_running.jpg) | | |
+| ![Favorites](./screenshots/favorites_screen.jpg) | ![AI Tutor](./screenshots/ai_tutor.jpg) | ![Visualization](./screenshots/algorithm_visualization_running.jpg) |
 
 ## ✨ Core Pillars
 
