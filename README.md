@@ -4,9 +4,25 @@
 
 ### 🌐 [Live Demo](https://shubham230523.github.io/AlgoLens/)
 
+### 📱 [Download Android APK](https://github.com/shubham230523/AlgoLens/releases)
+
 > [!IMPORTANT]
 > **Status: Under Active Development** 🛠️
 > This project is currently in development mode. Some features are being refined, and we are constantly adding new algorithms and visual enhancements. This is not a production-ready project. It is a React Native application developed using AI-assisted vibe coding with Gemini in Android Studio. The project is intended primarily as a demonstration/prototype rather than a production-grade application.
+
+## 📸 Screenshots
+
+| Home Screen | Categories | Explore Screen |
+| :---: | :---: | :---: |
+| ![Home Screen](./screenshots/home_screen_1.jpg) | ![Categories](./screenshots/home_screen_2.jpg) | ![Explore Screen](./screenshots/explore_screen.jpg) |
+
+| Favorites | AI Tutor | Algorithm Visualization |
+| :---: | :---: | :---: |
+| ![Favorites](./screenshots/favorites_screen.jpg) | ![AI Tutor](./screenshots/ai_tutor.jpg) | ![Visualization](./screenshots/algorithm_visualization_screen.jpg) |
+
+| Visualization Running |
+| :---: |
+| ![Running](./screenshots/algorithm_visualization_running.jpg) |
 
 ## ✨ Core Pillars
 
