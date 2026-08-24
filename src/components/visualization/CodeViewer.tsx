@@ -1,10 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Platform, Modal, TouchableWithoutFeedback } from 'react-native';
-import SyntaxHighlighter from 'react-native-syntax-highlighter';
-// @ts-ignore
-import atomDark from 'react-syntax-highlighter/dist/esm/styles/prism/atom-dark';
-// @ts-ignore
-import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform, Modal, TouchableWithoutFeedback, Text } from 'react-native';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { Copy, Check, Bookmark, RotateCcw, Maximize2, Terminal, ChevronDown } from 'lucide-react-native';
@@ -32,7 +27,6 @@ const THEMES = {
     highlight: '#f3f4f6',
     accent: '#007aff',
     comment: '#8c8c8c',
-    syntax: prism || {},
   },
   dark: {
     background: '#0B1020',
@@ -43,7 +37,6 @@ const THEMES = {
     highlight: 'rgba(108, 99, 255, 0.15)',
     accent: '#818CF8',
     comment: '#9aa0a6',
-    syntax: atomDark || {},
   },
 };
 
@@ -124,13 +117,6 @@ export function CodeViewer({
     setIsDropdownOpen(false);
   };
 
-  if (!SyntaxHighlighter) {
-      return (
-          <View style={[styles.container, { padding: 20 }]}>
-              <ThemedText>Syntax Highlighter is not available.</ThemedText>
-          </View>
-      );
-  }
 
   const displayCode = dedent(code?.[selectedLanguage] || '').trimEnd();
 
@@ -209,47 +195,11 @@ export function CodeViewer({
               animatedHighlightStyle
             ]} />
 
-            <SyntaxHighlighter
-              language={selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage}
-              style={theme.syntax}
-              customStyle={{
-                backgroundColor: 'transparent',
-                padding: 0,
-                margin: 0,
-                overflow: 'visible',
-              }}
-              highlighter="prism"
-              fontSize={19}
-              showLineNumbers={true}
-              wrapLines={false}
-              lineNumberStyle={{
-                minWidth: 60,
-                paddingRight: 15,
-                paddingLeft: 10,
-                color: theme.gutterText,
-                textAlign: 'right',
-                fontSize: 15,
-                backgroundColor: 'transparent',
-                fontFamily: FONT_MONO,
-                borderRightWidth: 1,
-                borderRightColor: theme.border,
-                marginRight: 30, // 30 padding as requested
-                height: LINE_HEIGHT,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              lineProps={() => ({
-                style: {
-                  height: LINE_HEIGHT,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  whiteSpace: 'pre',
-                },
-              })}
-            >
-              {displayCode}
-            </SyntaxHighlighter>
+            <View style={{ padding: 16, paddingTop: PADDING_TOP }}>
+               <Text style={{ color: theme.text, fontFamily: FONT_MONO, fontSize: 16, lineHeight: LINE_HEIGHT }}>
+                 {displayCode}
+               </Text>
+            </View>
           </View>
         </ScrollView>
       </ScrollView>

@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     width: 280,
     padding: Spacing.three,
     borderRadius: 12,
+    marginRight: Spacing.three,
   },
   header: {
     flexDirection: 'row',

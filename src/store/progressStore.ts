@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 interface UserProgress {
   viewedAlgorithms: string[]; // array of IDs
@@ -51,7 +51,28 @@ export const useProgressStore = create<ProgressState>()(
     }),
     {
       name: 'algolens-progress',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => {
+        if (Platform.OS === 'web') return window.localStorage;
+
+        const memoryStorage: any = {
+          getItem: (name: string) => null,
+          setItem: (name: string, value: string) => {},
+          removeItem: (name: string) => {},
+        };
+
+        try {
+          // Robustly check for AsyncStorage
+          const RNAS = require('@react-native-async-storage/async-storage');
+          const storage = RNAS.default || RNAS;
+          if (storage && typeof storage.getItem === 'function') {
+            return storage;
+          }
+        } catch (e) {
+          console.warn('AsyncStorage unavailable, falling back to memory');
+        }
+
+        return memoryStorage;
+      }),
     }
   )
 );

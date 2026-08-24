@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/theme';
-import { Home, Compass, Heart, Settings } from 'lucide-react-native';
+import { Home, Compass, Heart } from 'lucide-react-native';
 
 export default function TabLayout() {
   const scheme = useColorScheme() ?? 'light';

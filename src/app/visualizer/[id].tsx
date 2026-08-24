@@ -19,13 +19,13 @@ import { AITutorChat } from '@/components/visualization/AITutorChat';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Settings2, Brain, Heart, Sparkles, Info, MessageSquare, GripVertical } from 'lucide-react-native';
 import { SupportedLanguage } from '@/types/algorithm';
+import { useAdaptiveLayout } from '@/hooks/useAdaptiveLayout';
 
 export default function VisualizerScreen() {
   const { id } = useLocalSearchParams();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
-  const { width: windowWidth } = useWindowDimensions();
-  const isDesktop = windowWidth > 1100;
+  const { isPhone, isTablet, isDesktop } = useAdaptiveLayout();
 
   const [codeWidth, setCodeWidth] = useState(450);
   const [aiWidth, setAiWidth] = useState(350);
@@ -229,13 +229,18 @@ export default function VisualizerScreen() {
       />
 
       <ErrorBoundary>
-        <View style={[styles.mainLayout, isDesktop && styles.desktopLayout]}>
+        <View style={[styles.mainLayout, isDesktop && styles.desktopLayout, isTablet && styles.tabletLayout]}>
           {/* Column 1: Code */}
-          <View style={[styles.codeSection, isDesktop && { width: codeWidth }]}>
+          <View style={[
+            styles.codeSection,
+            isDesktop && { width: codeWidth },
+            isTablet && { width: '40%' },
+            isPhone && { height: 260, minHeight: 260 }
+          ]}>
             <CodeViewer
               code={algorithm.code}
               activeLine={currentEvent?.codeLine}
-              isDesktop={isDesktop}
+              isDesktop={isDesktop || isTablet}
               selectedLanguage={selectedLanguage}
               onLanguageChange={setSelectedLanguage}
             />
@@ -253,8 +258,8 @@ export default function VisualizerScreen() {
           )}
 
           {/* Column 2: Visualization */}
-          <View style={[styles.rightSection, isDesktop && styles.desktopRightSection]}>
-             <View style={styles.vizCanvas}>
+          <View style={[styles.rightSection, (isDesktop || isTablet) && styles.desktopRightSection]}>
+             <View style={[styles.vizCanvas, { minHeight: isPhone ? 180 : 400 }]}>
                 <View style={[styles.vizContainer, { backgroundColor: colors.backgroundElement + '08' }]}>
                   {showPrediction && nextEvent ? (
                     <PredictionOverlay
@@ -284,8 +289,8 @@ export default function VisualizerScreen() {
                 </View>
              </View>
 
-             <View style={styles.bottomSection}>
-                <View style={styles.metadataPanel}>
+             <View style={[styles.bottomSection, isPhone && { flex: 1.5, borderTopWidth: 0 }]}>
+                <View style={[styles.metadataPanel, isPhone && { paddingHorizontal: Spacing.four, paddingTop: Spacing.one }]}>
                   {currentEvent?.variables && (
                     <View style={styles.variablesPanel}>
                       <View style={styles.variablesGrid}>
@@ -302,7 +307,11 @@ export default function VisualizerScreen() {
                     </View>
                   )}
                   <View style={styles.descriptionRow}>
-                    <ThemedText variant="h3" style={styles.stepDescription} numberOfLines={2}>
+                    <ThemedText
+                      variant="h3"
+                      style={[styles.stepDescription, isPhone && { fontSize: 18, lineHeight: 24 }]}
+                      numberOfLines={2}
+                    >
                       {currentEvent?.description || 'Press Play to begin'}
                     </ThemedText>
                   </View>
@@ -372,9 +381,14 @@ const styles = StyleSheet.create({
   desktopLayout: {
     flexDirection: 'row',
   },
+  tabletLayout: {
+    flexDirection: 'row',
+  },
   codeSection: {
     padding: Spacing.two,
-    height: '100%',
+    height: Platform.OS === 'web' ? '100%' : 'auto',
+    minHeight: 300,
+    backgroundColor: 'rgba(0,0,0,0.02)',
   },
   rightSection: {
     flex: 1,
@@ -397,8 +411,7 @@ const styles = StyleSheet.create({
     cursor: 'col-resize',
   },
   vizCanvas: {
-    flex: 2,
-    padding: Spacing.four,
+    padding: Spacing.two, // Reduced padding
     position: 'relative',
   },
   vizContainer: {
@@ -439,9 +452,10 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     flex: 1,
-    padding: Spacing.four,
     borderTopWidth: 1,
     borderTopColor: '#eeeeee22',
+    justifyContent: 'space-between',
+    padding: 0, // Removed padding here
   },
   metadataPanel: {
     flex: 1,

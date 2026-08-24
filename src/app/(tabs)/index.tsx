@@ -19,8 +19,6 @@ import {
   Layout,
   Sparkles,
   BookOpen,
-  ChevronLeft,
-  ChevronRight,
   RotateCcw
 } from 'lucide-react-native';
 
@@ -38,46 +36,13 @@ const CATEGORY_ICONS: Record<string, any> = {
   'Linked List': Share2,
 };
 
+import { useAdaptiveLayout } from '@/hooks/useAdaptiveLayout';
+
 export default function HomeScreen() {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const router = useRouter();
-  const { width: windowWidth } = useWindowDimensions();
-  const categoryScrollRef = useRef<ScrollView>(null);
-
-  // Use a ref to track the current scroll position synchronously
-  const scrollOffset = useRef(0);
-  const [contentWidth, setContentWidth] = useState(1);
-  const containerWidth = windowWidth - Spacing.four * 2;
-
-  const scrollCategories = (direction: 'left' | 'right') => {
-    if (categoryScrollRef.current) {
-        const offset = direction === 'left' ? -400 : 400;
-        const newX = Math.max(0, Math.min(contentWidth - containerWidth, scrollOffset.current + offset));
-        categoryScrollRef.current.scrollTo({
-            x: newX,
-            animated: true
-        });
-    }
-  };
-
-  // Reanimated indicator logic
-  const scrollX = useSharedValue(0);
-  const indicatorStyle = useAnimatedStyle(() => {
-    const maxScroll = contentWidth - containerWidth;
-    if (maxScroll <= 0) return { opacity: 0, transform: [{ translateX: 0 }] };
-
-    const progress = scrollX.value / maxScroll;
-    const trackWidth = 100;
-    const indicatorWidth = 40;
-    const maxTranslate = trackWidth - indicatorWidth;
-
-    return {
-      opacity: 1,
-      transform: [{ translateX: Math.min(Math.max(progress * maxTranslate, 0), maxTranslate) }],
-    };
-  });
-
+  const { isPhone, isDesktop, getColumns, contentPadding } = useAdaptiveLayout();
   const featuredAlgorithms = ALL_ALGORITHMS.slice(0, 4);
 
   return (
@@ -86,11 +51,11 @@ export default function HomeScreen() {
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
-      <Animated.View entering={FadeInDown.duration(800)} style={styles.header}>
+      <Animated.View entering={FadeInDown.duration(800)} style={[styles.header, { paddingHorizontal: contentPadding }]}>
         <View style={styles.headerTop}>
             <View>
-                <ThemedText variant="h1" style={styles.heroTitle}>Explore</ThemedText>
-                <ThemedText variant="h1" style={[styles.heroTitle, { color: colors.primary }]}>Algorithms</ThemedText>
+                <ThemedText variant="h1" style={[styles.heroTitle, !isPhone && { fontSize: 64, lineHeight: 72 }]}>Explore</ThemedText>
+                <ThemedText variant="h1" style={[styles.heroTitle, { color: colors.primary }, !isPhone && { fontSize: 64, lineHeight: 72 }]}>Algorithms</ThemedText>
             </View>
             <TouchableOpacity style={[styles.aiBadge, { backgroundColor: colors.primary + '15' }]}>
                 <Sparkles size={18} color={colors.primary} />
@@ -102,75 +67,43 @@ export default function HomeScreen() {
         </ThemedText>
       </Animated.View>
 
-      {/* 1. Categories - Fixed Scroll with Arrows */}
+      {/* 1. Categories - Grid Layout */}
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
+        <View style={[styles.sectionHeader, { paddingHorizontal: contentPadding }]}>
             <ThemedText variant="h2" style={styles.sectionTitle}>Categories</ThemedText>
             <TouchableOpacity onPress={() => router.push('/explore')}>
                 <ThemedText style={{ color: colors.primary, fontWeight: '600' }}>View All</ThemedText>
             </TouchableOpacity>
         </View>
 
-        <View style={styles.horizontalWrapper}>
-            <TouchableOpacity
-                style={[styles.scrollArrow, styles.leftArrow, { backgroundColor: colors.backgroundElement }]}
-                onPress={() => scrollCategories('left')}
-                activeOpacity={0.8}
-            >
-                <ChevronLeft color={colors.text} size={20} />
-            </TouchableOpacity>
-
-            <ScrollView
-                ref={categoryScrollRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalList}
-                onScroll={(e) => {
-                    const x = e.nativeEvent.contentOffset.x;
-                    scrollX.value = x;
-                    scrollOffset.current = x; // Update synchronous ref
-                }}
-                onContentSizeChange={(w) => setContentWidth(w)}
-                scrollEventThrottle={16}
-                decelerationRate="fast"
-                scrollEnabled={true}
-            >
+        <View style={[styles.gridContainer, { paddingHorizontal: contentPadding }]}>
             {CATEGORIES.map((category, index) => {
                 const Icon = CATEGORY_ICONS[category] || BookOpen;
+                const cols = getColumns(2, 3, 4);
+                // Explicitly set width to nearly half for 2 columns to force side-by-side
+                const itemWidth = cols === 2 ? '48%' : cols === 3 ? '31%' : '23%';
+
                 return (
-                <Animated.View key={category} entering={FadeInRight.delay(index * 100)}>
+                <Animated.View key={category} entering={FadeInDown.delay(index * 50)} style={{ width: itemWidth as any }}>
                     <TouchableOpacity
                     activeOpacity={0.8}
                     style={[styles.categoryCard, { backgroundColor: colors.backgroundElement }]}
                     onPress={() => router.push({ pathname: '/explore', params: { category } })}
                     >
                     <View style={[styles.categoryIcon, { backgroundColor: colors.primary + '10' }]}>
-                        <Icon color={colors.primary} size={28} />
+                        <Icon color={colors.primary} size={22} />
                     </View>
                     <ThemedText variant="h3" style={styles.categoryText}>{category}</ThemedText>
                     </TouchableOpacity>
                 </Animated.View>
                 );
             })}
-            </ScrollView>
-
-            <TouchableOpacity
-                style={[styles.scrollArrow, styles.rightArrow, { backgroundColor: colors.backgroundElement }]}
-                onPress={() => scrollCategories('right')}
-                activeOpacity={0.8}
-            >
-                <ChevronRight color={colors.text} size={20} />
-            </TouchableOpacity>
-        </View>
-
-        <View style={[styles.indicatorContainer, { backgroundColor: colors.backgroundSelected + '44' }]}>
-          <Animated.View style={[styles.indicator, { backgroundColor: colors.primary }, indicatorStyle]} />
         </View>
       </View>
 
       {/* 2. Learning Paths */}
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
+        <View style={[styles.sectionHeader, { paddingHorizontal: contentPadding }]}>
             <ThemedText variant="h2" style={styles.sectionTitle}>Learning Paths</ThemedText>
             <View style={[styles.badge, { backgroundColor: colors.secondary + '20' }]}>
                 <ThemedText style={{ color: colors.secondary, fontSize: 14, fontWeight: 'bold' }}>PRO</ThemedText>
@@ -179,7 +112,7 @@ export default function HomeScreen() {
         <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
+            contentContainerStyle={[styles.horizontalList, { paddingHorizontal: contentPadding }]}
             decelerationRate="fast"
         >
           {LEARNING_PATHS.map((path, index) => (
@@ -195,11 +128,11 @@ export default function HomeScreen() {
 
       {/* 3. Featured */}
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
+        <View style={[styles.sectionHeader, { paddingHorizontal: contentPadding }]}>
             <ThemedText variant="h2" style={styles.sectionTitle}>Featured Algorithms</ThemedText>
             <BarChart3 color={colors.primary} size={24} />
         </View>
-        <View style={styles.listContent}>
+        <View style={[styles.listContent, { paddingHorizontal: contentPadding }]}>
           {featuredAlgorithms.map((algo, index) => (
             <Animated.View key={algo.id} entering={FadeInDown.delay(index * 100)}>
                 <AlgorithmCard
@@ -269,33 +202,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 8,
   },
-  horizontalWrapper: {
-    position: 'relative',
-    alignItems: 'center',
-  },
-  scrollArrow: {
-    position: 'absolute',
-    top: '50%',
-    marginTop: -30, // Centered vertically relative to cards
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    zIndex: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  leftArrow: {
-    left: 12,
-  },
-  rightArrow: {
-    right: 12,
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: Spacing.three,
   },
   horizontalList: {
     gap: Spacing.three,
@@ -307,38 +218,25 @@ const styles = StyleSheet.create({
     gap: Spacing.four,
   },
   categoryCard: {
-    width: 200,
-    height: 140,
-    padding: Spacing.four,
-    borderRadius: 28,
+    width: '100%',
+    height: 110,
+    padding: Spacing.three,
+    borderRadius: 24,
     alignItems: 'flex-start',
-    gap: Spacing.three,
+    gap: Spacing.two,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.06)',
     justifyContent: 'center',
   },
   categoryIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
   categoryText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '700',
-  },
-  indicatorContainer: {
-    height: 6,
-    width: 100,
-    alignSelf: 'center',
-    marginTop: Spacing.two,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  indicator: {
-    height: '100%',
-    width: 40,
-    borderRadius: 3,
   }
 });

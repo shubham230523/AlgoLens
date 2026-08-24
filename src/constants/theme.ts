@@ -83,5 +83,11 @@ export const Spacing = {
   six: 64,
 } as const;
 
+export const Breakpoints = {
+  PHONE: 480,
+  TABLET: 768,
+  DESKTOP: 1024,
+} as const;
+
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const MaxContentWidth = 1200;

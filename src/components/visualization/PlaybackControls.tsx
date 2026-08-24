@@ -109,17 +109,13 @@ export function PlaybackControls() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.two,
-    paddingBottom: Spacing.six,
+    paddingTop: Spacing.one,
+    paddingBottom: Spacing.two, // Reduced bottom padding
     width: '100%',
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: 'transparent',
   },
   progressSection: {
-    marginBottom: Spacing.four,
+    marginBottom: Spacing.two,
   },
   progressBarBg: {
     height: 6,
@@ -143,37 +139,36 @@ const styles = StyleSheet.create({
   speedSection: {
     flexDirection: 'row',
     gap: 4,
-    flex: 1,
-    maxWidth: 220,
+    width: 120, // Reduced width
   },
   speedBtn: {
-    paddingHorizontal: 6,
-    paddingVertical: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: 'transparent',
   },
   speedText: {
-    fontSize: 10,
+    fontSize: 8,
   },
   centerControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.four,
+    gap: Spacing.two,
   },
   iconBtn: {
-    padding: Spacing.one,
+    padding: Spacing.half,
   },
   playBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
 });

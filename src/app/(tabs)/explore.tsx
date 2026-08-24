@@ -8,13 +8,16 @@ import { ThemedText } from '@/components/ui/ThemedText';
 import { AlgorithmCard } from '@/components/ui/AlgorithmCard';
 import { Input } from '@/components/ui/Input';
 import { Search } from 'lucide-react-native';
+import { useAdaptiveLayout } from '@/hooks/useAdaptiveLayout';
 
 export default function ExploreScreen() {
   const { category: initialCategory } = useLocalSearchParams<{ category?: string }>();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const router = useRouter();
+  const { getColumns, contentPadding } = useAdaptiveLayout();
 
+  const numColumns = getColumns(1, 2, 3);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredAlgorithms = useMemo(() => {
@@ -40,9 +43,12 @@ export default function ExploreScreen() {
       </View>
 
       <FlatList
+        key={numColumns}
         data={filteredAlgorithms}
+        numColumns={numColumns}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingHorizontal: contentPadding, gap: Spacing.two }]}
+        columnWrapperStyle={numColumns > 1 ? { gap: Spacing.two } : undefined}
         ListHeaderComponent={
           initialCategory ? (
             <ThemedText variant="h2" style={styles.listHeader}>
@@ -51,10 +57,12 @@ export default function ExploreScreen() {
           ) : null
         }
         renderItem={({ item }) => (
-          <AlgorithmCard
-            algorithm={item}
-            onPress={() => router.push(`/visualizer/${item.id}`)}
-          />
+          <View style={{ flex: 1 }}>
+            <AlgorithmCard
+                algorithm={item}
+                onPress={() => router.push(`/visualizer/${item.id}`)}
+            />
+          </View>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
